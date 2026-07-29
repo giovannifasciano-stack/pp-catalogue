@@ -61,29 +61,27 @@ main{padding:8px 16px}
 .thumb{cursor:zoom-in}
 #sheetOverlay{display:none;position:fixed;inset:0;background:rgba(10,14,26,.55);z-index:100;overflow:auto;padding:24px 12px}
 #sheetOverlay.open{display:block}
-.sheet{background:#fff;color:#1a2238;max-width:760px;margin:0 auto;border-radius:16px;padding:26px 32px;text-align:center;position:relative}
-.sheet .brand{font-size:11px;letter-spacing:4px;text-transform:uppercase;color:#b08d3f}
-.sheet h1{font-weight:300;font-size:23px;margin:4px 0 1px;color:#1a2238}
-.sheet .scol{font-size:11.5px;color:#666;margin-bottom:10px}
-.sheet .stop{display:flex;align-items:center;gap:20px;text-align:left;margin-bottom:8px}
-.sheet .photo{width:34%;max-height:190px;object-fit:contain;flex:0 0 auto;display:block}
-.sheet .stop-meta{flex:1;min-width:0}
-.sheet .smat{font-size:11.5px;line-height:1.45;color:#333;margin-bottom:6px}
-.sheet .spr{display:inline-block;font-family:'DM Mono',monospace;font-size:14px;color:#b08d3f;margin:2px 14px 2px 0}
-.sheet .spr span{font-size:9px;color:#999}
-.sheet .sdesc{font-size:10.5px;line-height:1.4;color:#333;text-align:left;column-count:2;column-gap:22px;margin:10px 0 4px}
-.sheet .tc{margin:0 0 8px;break-inside:avoid}
-.sheet .tct{display:block;font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:1.5px;text-transform:uppercase;color:#b08d3f;margin-bottom:1px}
-.sheet .ssrc{margin-top:10px;font-family:'DM Mono',monospace;font-size:8px;color:#aaa}
-.sheet-btns{display:flex;gap:10px;justify-content:center;margin-top:16px}
+.sheet{background:#fff;color:#1a2238;max-width:640px;margin:0 auto;border-radius:16px;padding:38px 30px;text-align:center;position:relative}
+.sheet .brand{font-size:12px;letter-spacing:4px;text-transform:uppercase;color:#b08d3f}
+.sheet h1{font-weight:300;font-size:28px;margin:6px 0 2px;color:#1a2238}
+.sheet .scol{font-size:13px;color:#666;margin-bottom:20px}
+.sheet .photo{max-width:75%;max-height:44vh;object-fit:contain;margin:0 auto 22px;display:block}
+.sheet .smat{font-size:13px;line-height:1.6;max-width:480px;margin:0 auto 6px;color:#333}
+.sheet .sdesc{font-size:12.5px;line-height:1.6;max-width:500px;margin:0 auto 16px;color:#333;text-align:left}
+.sheet .tc{margin:0 0 9px}
+.sheet .tct{display:block;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#b08d3f;margin-bottom:2px}
+.sheet .spr{font-family:'DM Mono',monospace;font-size:16px;color:#b08d3f;margin:3px 0}
+.sheet .spr span{font-size:10px;color:#999}
+.sheet .ssrc{margin-top:26px;font-family:'DM Mono',monospace;font-size:9px;color:#aaa}
+.sheet-btns{display:flex;gap:10px;justify-content:center;margin-top:22px}
 .sheet-btns button{border:0;border-radius:9px;padding:11px 22px;font-family:Outfit,sans-serif;font-size:14px;cursor:pointer}
 .sheet-btns .bprint{background:#1a2238;color:#fff}
 .sheet-btns .bclose{background:#eee;color:#1a2238}
 @media print{
-  @page{margin:10mm}
   body.sheet-open > *:not(#sheetOverlay){display:none!important}
   #sheetOverlay{position:static;background:#fff;padding:0;overflow:visible}
-  .sheet{border-radius:0;max-width:none;padding:0}
+  .sheet{border-radius:0;max-width:none;padding:10px}
+  .sheet .photo{max-height:50vh}
   .sheet-btns{display:none!important}
 }
 .card .ref{cursor:pointer;text-decoration:underline;text-decoration-color:transparent;transition:text-decoration-color .15s}
@@ -95,10 +93,6 @@ main{padding:8px 16px}
 .meta .price{font-family:'DM Mono',monospace;font-size:14px;color:var(--gold2);margin-top:6px}
 .meta .price.est{font-size:10.5px;color:var(--dim);margin-top:2px}
 .badge{position:absolute;top:8px;left:8px;font-family:'DM Mono',monospace;font-size:9.5px;font-weight:500;letter-spacing:.08em;padding:3px 8px;border-radius:6px;z-index:2;background:var(--green);color:#0a1428}
-.badge.disc{background:#5a5f6e;color:#e8e9ee;left:auto;right:8px}
-.card.disc{opacity:.62}
-.card.disc:hover{opacity:.9}
-.disc-section .brand-head h2{color:var(--dim)}
 
 #empty{display:none;text-align:center;padding:60px 20px;color:var(--dim);font-size:14px}
 #loader{display:none;text-align:center;padding:50px 20px;font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);letter-spacing:.15em}
@@ -143,8 +137,7 @@ footer .src a{color:var(--gold);text-decoration:none}
 <script>
 (() => {
 const FINDER = 'https://www.patek.com/en/collection/watch-finder';
-const ARCH_KEY = 'pp_archive_v2';
-const LASTCHK_KEY = 'pp_lastchk_v1';
+const SNAP_KEY = 'pp_snapshot_v1';
 const CAT_KEY = 'pp_catalog_v1';
 const CAT_TTL = 24 * 60 * 60 * 1000;
 
@@ -178,8 +171,7 @@ const RETAIL = {
 };
 
 let items = [];
-let archive = {};
-let discontinued = [];
+let snapshot = null;
 let added = [];
 const PROXY = 'https://watch-proxy.owscan.workers.dev/?u=';
 function thumbURL(u){
@@ -303,73 +295,26 @@ function parseCatalog(html){
   return out;
 }
 
-// ---------- novità e fuori catalogo (archivio automatico) ----------
-function loadArchive(){
-  try{ const r = lsGet(ARCH_KEY); return r ? JSON.parse(r) : {}; }catch(e){ return {}; }
-}
-function saveArchive(){ lsSet(ARCH_KEY, JSON.stringify(archive)); }
-function updateArchive(){
-  const prevArchive = archive;
-  const prevCheckRaw = lsGet(LASTCHK_KEY);
-  const prevCheck = prevCheckRaw ? +prevCheckRaw : null;
-  const curIds = new Set(items.map(p => p.id));
-
-  added = items.filter(p => !prevArchive[p.id]).map(p => p.id);
-
-  const next = {};
-  const now = Date.now();
+// ---------- novità ----------
+function computeAdded(){
+  added = [];
+  if(!snapshot) return;
   for(const p of items){
-    const old = prevArchive[p.id];
-    next[p.id] = {...p, firstSeen: old ? old.firstSeen : now, lastSeen: now};
+    if(!snapshot.ids.includes(p.id)) added.push(p.id);
   }
-  for(const id in prevArchive){
-    if(!curIds.has(id)) next[id] = prevArchive[id];   // conservato come fuori catalogo
-  }
-  archive = next;
-  saveArchive();
-  lsSet(LASTCHK_KEY, String(now));
-
-  discontinued = Object.values(archive)
-    .filter(p => !curIds.has(p.id))
-    .sort((a,b) => (b.lastSeen||0) - (a.lastSeen||0));
-
-  return prevCheck;
 }
-function renderNews(prevCheck){
+function renderNews(){
   const bar = document.getElementById('newsbar');
-  if(!prevCheck || !added.length){ bar.classList.remove('show'); return; }
+  if(!snapshot || !added.length){ bar.classList.remove('show'); return; }
   const names = items.filter(p => added.includes(p.id)).slice(0,6).map(p => esc(p.ref));
   document.getElementById('newsTxt').innerHTML =
-    '<b>' + added.length + ' nuove referenze</b> dall\'ultima lettura (' +
-    new Date(prevCheck).toLocaleDateString('it-IT') + '): ' + names.join(' · ') +
+    '<b>' + added.length + ' nuove referenze</b> dall\'ultima visita (' +
+    new Date(snapshot.ts).toLocaleDateString('it-IT') + '): ' + names.join(' · ') +
     (added.length > 6 ? ' …' : '');
   bar.classList.add('show');
 }
 
 // ---------- render ----------
-function buildCard(p, isNew, isDisc){
-  const card = document.createElement('div');
-  card.className = 'card' + (isDisc ? ' disc' : '');
-  card.innerHTML =
-    (isNew ? '<span class="badge">NEW</span>' : '') +
-    (isDisc ? '<span class="badge disc">FUORI CATALOGO</span>' : '') +
-    '<div class="thumb">' + (p.img ? '<img loading="lazy" decoding="async" src="'+esc(thumbURL(p.img))+'" data-orig="'+esc(p.img)+'" alt="" onerror="if(this.dataset.orig){this.src=this.dataset.orig;delete this.dataset.orig}else{this.parentNode.innerHTML=\'<span class=noimg>NO IMG</span>\'}">' : '<span class="noimg">NO IMG</span>') + '</div>' +
-    '<div class="meta"><div class="ref">'+esc(p.ref)+'</div>' +
-    '<div class="mat">'+esc(p.mat || '')+'</div>' +
-    retailLine(p.ref) +
-    '<div class="col">'+esc(p.col)+'</div></div>';
-  const th = card.querySelector('.thumb');
-  if(th) th.addEventListener('click', () => openSheet({...p, discontinued: isDisc}));
-  const rf = card.querySelector('.ref');
-  if(rf) rf.addEventListener('click', () => window.open(p.url, '_blank', 'noopener'));
-  const priceEl = card.querySelector('[data-usd]');
-  if(priceEl && priceObserver && usdOf(p.ref) == null){
-    priceEl.dataset.ref = p.ref;
-    priceEl.dataset.purl = p.url;
-    priceObserver.observe(priceEl);
-  }
-  return card;
-}
 function render(){
   const q = document.getElementById('search').value.trim().toLowerCase();
   const main = document.getElementById('main');
@@ -393,27 +338,33 @@ function render(){
     sec.innerHTML = '<div class="brand-head"><h2>'+esc(c)+'</h2><span class="cnt">'+list.length+' modelli</span></div>';
     const grid = document.createElement('div');
     grid.className = 'grid';
-    for(const p of list){ grid.appendChild(buildCard(p, added.includes(p.id), false)); shown++; }
+
+    for(const p of list){
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML =
+        (added.includes(p.id) ? '<span class="badge">NEW</span>' : '') +
+        '<div class="thumb">' + (p.img ? '<img loading="lazy" decoding="async" src="'+esc(thumbURL(p.img))+'" data-orig="'+esc(p.img)+'" alt="" onerror="if(this.dataset.orig){this.src=this.dataset.orig;delete this.dataset.orig}else{this.parentNode.innerHTML=\'<span class=noimg>NO IMG</span>\'}">' : '<span class="noimg">NO IMG</span>') + '</div>' +
+        '<div class="meta"><div class="ref">'+esc(p.ref)+'</div>' +
+        '<div class="mat">'+esc(p.mat || '')+'</div>' +
+        retailLine(p.ref) +
+        '<div class="col">'+esc(p.col)+'</div></div>';
+      const th = card.querySelector('.thumb');
+      if(th) th.addEventListener('click', () => openSheet(p));
+      const rf = card.querySelector('.ref');
+      if(rf) rf.addEventListener('click', () => window.open(p.url, '_blank', 'noopener'));
+      grid.appendChild(card);
+      const priceEl = card.querySelector('[data-usd]');
+      if(priceEl && priceObserver && usdOf(p.ref) == null){
+        priceEl.dataset.ref = p.ref;
+        priceEl.dataset.purl = p.url;
+        priceObserver.observe(priceEl);
+      }
+      shown++;
+    }
     sec.appendChild(grid);
     main.appendChild(sec);
   }
-
-  // ---- fuori catalogo ----
-  let discList = discontinued;
-  if(activeCol !== 'ALL') discList = discList.filter(p => p.col === activeCol);
-  if(q) discList = discList.filter(p => (p.ref + ' ' + p.mat + ' ' + p.col).toLowerCase().includes(q));
-  if(discList.length){
-    const sec = document.createElement('section');
-    sec.className = 'brand-section disc-section';
-    sec.innerHTML = '<div class="brand-head"><h2>Fuori catalogo</h2><span class="cnt">'+discList.length+' referenze</span></div>';
-    const grid = document.createElement('div');
-    grid.className = 'grid';
-    for(const p of discList){ grid.appendChild(buildCard(p, false, true)); }
-    sec.appendChild(grid);
-    main.appendChild(sec);
-    shown += discList.length;
-  }
-
   document.getElementById('empty').style.display = shown ? 'none' : 'block';
 }
 
@@ -512,25 +463,25 @@ function openSheet(p){
   const cached = descCache[p.ref];
   const descInit = (cached && cached.v) ? descHTML(cached.v) : '<span style="color:#bbb">caricamento caratteristiche tecniche\u2026</span>';
   box.innerHTML =
-    '<div class="brand">Patek Philippe' + (p.discontinued ? ' \u00B7 fuori catalogo' : '') + '</div>' +
+    '<div class="brand">Patek Philippe</div>' +
     '<h1>' + esc(p.ref) + '</h1>' +
     '<div class="scol">' + esc(p.col || '') + '</div>' +
-    '<div class="stop">' +
-      (p.img ? '<img class="photo" src="' + esc(p.img) + '">' : '') +
-      '<div class="stop-meta">' +
-        (p.mat ? '<div class="smat">' + esc(p.mat) + '</div>' : '') +
-        prices +
-      '</div>' +
-    '</div>' +
+    (p.img ? '<img class="photo" src="' + esc(p.img) + '">' : '') +
+    (p.mat ? '<div class="smat">' + esc(p.mat) + '</div>' : '') +
     '<div class="sdesc" id="sheetDesc">' + descInit + '</div>' +
+    prices +
     '<div class="ssrc">patek.com \u00B7 PP Catalogue</div>' +
     '<div class="sheet-btns">' +
-      '<button class="bprint" onclick="window.print()">Stampa scheda</button>' +
-      '<button class="bclose" onclick="closeSheet()">Chiudi</button>' +
+      '<button class="bprint" id="btnPrintSheet" type="button">Stampa scheda</button>' +
+      '<button class="bclose" id="btnCloseSheet" type="button">Chiudi</button>' +
     '</div>';
   ov.classList.add('open');
   document.body.classList.add('sheet-open');
   ov.onclick = e => { if(e.target === ov) closeSheet(); };
+  const bp = document.getElementById('btnPrintSheet');
+  if(bp) bp.addEventListener('click', () => window.print());
+  const bc = document.getElementById('btnCloseSheet');
+  if(bc) bc.addEventListener('click', closeSheet);
   if(!(cached && cached.v)){
     fetchDesc(p).then(d => {
       const el = document.getElementById('sheetDesc');
@@ -577,14 +528,16 @@ async function refresh(force){
       items = parsed;
       lsSet(CAT_KEY, JSON.stringify({ts: Date.now(), items}));
     }
-    archive = loadArchive();
-    const prevCheck = updateArchive();
+    snapshot = (() => { try{ const r = lsGet(SNAP_KEY); return r ? JSON.parse(r) : null; }catch(e){ return null; } })();
+    computeAdded();
     document.getElementById('lastSync').textContent = new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
     status.innerHTML = '<span class="hl">'+items.length+'</span> modelli a catalogo · ' +
-      new Set(items.map(p=>p.col)).size + ' collezioni' + (usedCache ? ' · cache' : '') +
-      (discontinued.length ? ' · '+discontinued.length+' fuori catalogo' : '');
-    renderNews(prevCheck);
+      new Set(items.map(p=>p.col)).size + ' collezioni' + (usedCache ? ' · cache' : '');
+    renderNews();
     render();
+    // segna automaticamente come visto: la prossima lettura mostrerà solo le referenze davvero nuove
+    snapshot = { ts: Date.now(), ids: items.map(p => p.id) };
+    lsSet(SNAP_KEY, JSON.stringify(snapshot));
   }catch(e){
     status.innerHTML = 'Impossibile leggere il catalogo ('+esc(e.message)+'). Riprova con Aggiorna — e ricorda che nell\'anteprima di Claude le connessioni esterne sono bloccate.';
   }finally{
