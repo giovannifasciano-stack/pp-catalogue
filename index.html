@@ -29,7 +29,7 @@ header{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,var(--
 h1{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:center;gap:10px}
 h1 span{color:var(--gold2)}
 h1 img{width:26px;height:26px;border-radius:50%;background:#fff;padding:2px}
-.src.dis{margin-top:6px;max-width:520px;margin-left:auto;margin-right:auto;opacity:.6;line-height:1.5}
+.src.dis{font-size:7px;opacity:.4;letter-spacing:0;max-width:none;line-height:1.2}
 h1 .mark{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:#b08d3f;color:#12182b;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.5px;margin-right:6px;vertical-align:middle}
 #lastSync{font-family:'DM Mono',monospace;font-size:10px;color:var(--dim)}
 
@@ -69,9 +69,11 @@ main{padding:8px 16px}
 .thumb img{width:100%;height:100%;object-fit:contain}
 .thumb .noimg{font-family:'DM Mono',monospace;font-size:10px;color:#999}
 .thumb{cursor:zoom-in}
-#sheetOverlay{display:none;position:fixed;inset:0;background:rgba(10,14,26,.55);z-index:100;overflow:auto;padding:24px 12px}
+#sheetOverlay{display:none;position:fixed;inset:0;background:rgba(20,13,8,.65);z-index:100;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:16px 10px calc(24px + env(safe-area-inset-bottom))}
 #sheetOverlay.open{display:block}
-.sheet{background:#fff;color:#1a2238;max-width:640px;margin:0 auto;border-radius:16px;padding:38px 30px;text-align:center;position:relative}
+body.sheet-open{overflow:hidden}
+@supports (-webkit-touch-callout:none){body.sheet-open #sheetOverlay{position:fixed;height:100dvh}}
+.sheet{background:#fff;color:#1a2238;max-width:640px;margin:0 auto;border-radius:16px;padding:26px 20px 0;text-align:center;position:relative}
 .sheet .brand{font-size:12px;letter-spacing:4px;text-transform:uppercase;color:#b08d3f}
 .sheet h1{font-weight:300;font-size:28px;margin:6px 0 2px;color:#1a2238}
 .sheet .scol{font-size:13px;color:#666;margin-bottom:20px}
@@ -85,7 +87,7 @@ main{padding:8px 16px}
 .sheet .sprices .price.wait{color:#bbb;font-size:13px}
 .sheet .spr span{font-size:10px;color:#999}
 .sheet .ssrc{margin-top:26px;font-family:'DM Mono',monospace;font-size:9px;color:#aaa}
-.sheet-btns{display:flex;gap:10px;justify-content:center;margin-top:22px}
+.sheet-btns{position:sticky;bottom:0;display:flex;gap:10px;justify-content:center;padding:12px 0 16px;margin-top:14px;background:linear-gradient(rgba(255,255,255,0),#fff 28%)}
 .sheet-btns button{border:0;border-radius:9px;padding:11px 22px;font-family:Outfit,sans-serif;font-size:14px;cursor:pointer}
 .sheet-btns .bprint{background:#1a2238;color:#fff}
 .sheet-btns .bclose{background:#eee;color:#1a2238}
@@ -122,8 +124,8 @@ main{padding:8px 16px}
 #loadCount b{display:block;font-family:'DM Mono',monospace;font-size:26px;font-weight:500;color:var(--gold2);line-height:1.15;font-variant-numeric:tabular-nums}
 #loadCount span{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
 
-footer{position:fixed;bottom:0;left:0;right:0;padding:8px 16px calc(8px + env(safe-area-inset-bottom));background:rgba(10,20,40,.94);backdrop-filter:blur(8px);border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
-footer .src{font-family:'DM Mono',monospace;font-size:10px;color:var(--dim)}
+footer{position:fixed;bottom:0;left:0;right:0;padding:4px 12px calc(4px + env(safe-area-inset-bottom));background:rgba(34,23,16,.94);backdrop-filter:blur(8px);border-top:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:1px}
+footer .src{font-family:'DM Mono',monospace;font-size:8.5px;color:var(--dim);text-align:center;line-height:1.25}
 footer .src a{color:var(--gold);text-decoration:none}
 </style>
 </head>
@@ -161,7 +163,7 @@ footer .src a{color:var(--gold);text-decoration:none}
 
 <footer>
   <div class="src">patek.com · listino EU gen 2026 (€) · novità W&amp;W in CHF</div>
-  <div class="src dis">Strumento privato non ufficiale, a uso interno. Marchi, immagini e testi descrittivi appartengono a Patek Philippe SA. Nessuna affiliazione.</div>
+  <div class="src dis">Strumento privato non ufficiale · marchi e contenuti Patek Philippe SA · nessuna affiliazione</div>
 </footer>
 
 <script>
