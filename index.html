@@ -99,10 +99,17 @@ main{padding:8px 16px}
 .badge{position:absolute;top:8px;left:8px;font-family:'DM Mono',monospace;font-size:9.5px;font-weight:500;letter-spacing:.08em;padding:3px 8px;border-radius:6px;z-index:2;background:var(--green);color:#0a1428}
 
 #empty{display:none;text-align:center;padding:60px 20px;color:var(--dim);font-size:14px}
-#loader{display:none;text-align:center;padding:50px 20px;font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);letter-spacing:.15em}
-.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--gold);border-radius:50%;animation:sp 1s linear infinite;vertical-align:-2px;margin-right:8px}
+#loader{display:none;flex-direction:column;align-items:center;gap:16px;padding:70px 20px}
+#loader.on{display:flex}
+.spin{width:46px;height:46px;border-radius:50%;background:conic-gradient(var(--gold),rgba(176,141,63,.05) 70%);animation:sp 1.05s linear infinite;position:relative}
+.spin::after{content:'';position:absolute;inset:5px;border-radius:50%;background:var(--bg)}
 @keyframes sp{to{transform:rotate(360deg)}}
-@media (prefers-reduced-motion: reduce){.spin{animation-duration:2.5s}}
+@media (prefers-reduced-motion: reduce){.spin{animation-duration:3s}}
+#loadPhase{font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);letter-spacing:.28em;text-transform:uppercase}
+#loadCount{display:flex;gap:26px;justify-content:center}
+#loadCount div{text-align:center}
+#loadCount b{display:block;font-family:'DM Mono',monospace;font-size:26px;font-weight:500;color:var(--gold2);line-height:1.15;font-variant-numeric:tabular-nums}
+#loadCount span{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
 
 footer{position:fixed;bottom:0;left:0;right:0;padding:8px 16px calc(8px + env(safe-area-inset-bottom));background:rgba(10,20,40,.94);backdrop-filter:blur(8px);border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
 footer .src{font-family:'DM Mono',monospace;font-size:10px;color:var(--dim)}
@@ -130,7 +137,14 @@ footer .src a{color:var(--gold);text-decoration:none}
   <p id="newsTxt"></p>
 </div>
 
-<div id="loader"><span class="spin"></span>LETTURA CATALOGO PATEK…</div>
+<div id="loader">
+  <span class="spin"></span>
+  <div id="loadPhase">Connessione al catalogo</div>
+  <div id="loadCount">
+    <div><b id="cModels">0</b><span>modelli</span></div>
+    <div><b id="cCols">0</b><span>collezioni</span></div>
+  </div>
+</div>
 <main id="main"></main>
 <div id="empty">Nessun risultato con questi filtri.</div>
 
@@ -518,11 +532,42 @@ function retailLine(ref){
 }
 function esc(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
+// ---------- loader animato ----------
+let countTimer = null;
+function setPhase(t){ const e = document.getElementById('loadPhase'); if(e) e.textContent = t; }
+function setCounts(models, cols){
+  const m = document.getElementById('cModels'), c = document.getElementById('cCols');
+  if(m) m.textContent = models;
+  if(c) c.textContent = cols;
+}
+// conta verso il valore finale con effetto contachilometri
+function countTo(models, cols, ms){
+  clearInterval(countTimer);
+  const m0 = parseInt(document.getElementById('cModels').textContent, 10) || 0;
+  const c0 = parseInt(document.getElementById('cCols').textContent, 10) || 0;
+  const t0 = performance.now();
+  countTimer = setInterval(() => {
+    const k = Math.min(1, (performance.now() - t0) / (ms || 800));
+    const e = 1 - Math.pow(1 - k, 3);
+    setCounts(Math.round(m0 + (models - m0) * e), Math.round(c0 + (cols - c0) * e));
+    if(k >= 1) clearInterval(countTimer);
+  }, 40);
+}
+function loaderOn(){
+  clearInterval(countTimer);
+  setCounts(0, 0);
+  setPhase('Connessione al catalogo');
+  document.getElementById('loader').classList.add('on');
+}
+function loaderOff(){
+  clearInterval(countTimer);
+  document.getElementById('loader').classList.remove('on');
+}
+
 // ---------- azioni ----------
 async function refresh(force){
-  const loader = document.getElementById('loader');
   const status = document.getElementById('status');
-  loader.style.display = 'block';
+  loaderOn();
   status.textContent = '';
   try{
     let usedCache = false;
@@ -533,17 +578,25 @@ async function refresh(force){
           const c = JSON.parse(raw);
           if(Date.now() - c.ts < CAT_TTL && c.items && c.items.length){
             items = c.items; usedCache = true;
+            setPhase('Catalogo in memoria');
           }
         }catch(e){}
       }
     }
     if(!usedCache){
+      setPhase('Lettura patek.com');
       const html = await getHTML(FINDER);
+      setPhase('Analisi referenze');
+      await new Promise(r => setTimeout(r, 30));   // lascia respirare l'animazione
       const parsed = parseCatalog(html);
       if(!parsed.length) throw new Error('catalogo non leggibile');
       items = parsed;
       lsSet(CAT_KEY, JSON.stringify({ts: Date.now(), items}));
     }
+    const nCols = new Set(items.map(p => p.col)).size;
+    setPhase(usedCache ? 'Catalogo pronto' : 'Catalogo aggiornato');
+    countTo(items.length, nCols, 900);
+    await new Promise(r => setTimeout(r, 1000));
     snapshot = (() => { try{ const r = lsGet(SNAP_KEY); return r ? JSON.parse(r) : null; }catch(e){ return null; } })();
     computeAdded();
     document.getElementById('lastSync').textContent = new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
@@ -555,9 +608,10 @@ async function refresh(force){
     snapshot = { ts: Date.now(), ids: items.map(p => p.id) };
     lsSet(SNAP_KEY, JSON.stringify(snapshot));
   }catch(e){
+    setPhase('Lettura non riuscita');
     status.innerHTML = 'Impossibile leggere il catalogo ('+esc(e.message)+'). Riprova con Aggiorna — e ricorda che nell\'anteprima di Claude le connessioni esterne sono bloccate.';
   }finally{
-    loader.style.display = 'none';
+    loaderOff();
   }
 }
 
