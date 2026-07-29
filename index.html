@@ -433,6 +433,7 @@ async function fetchDesc(p){
 function descHTML(secs){
   return secs.map(s => '<div class="tc"><span class="tct">' + esc(s.t) + '</span>' + esc(s.b) + '</div>').join('');
 }
+window.closeSheet = closeSheet;
 function closeSheet(){
   const o = document.getElementById('sheetOverlay');
   if(o) o.classList.remove('open');
@@ -469,12 +470,16 @@ function openSheet(p){
     prices +
     '<div class="ssrc">patek.com \u00B7 PP Catalogue</div>' +
     '<div class="sheet-btns">' +
-      '<button class="bprint" onclick="window.print()">Stampa scheda</button>' +
-      '<button class="bclose" onclick="closeSheet()">Chiudi</button>' +
+      '<button class="bprint" id="btnPrintSheet" type="button">Stampa scheda</button>' +
+      '<button class="bclose" id="btnCloseSheet" type="button">Chiudi</button>' +
     '</div>';
   ov.classList.add('open');
   document.body.classList.add('sheet-open');
   ov.onclick = e => { if(e.target === ov) closeSheet(); };
+  const bp = document.getElementById('btnPrintSheet');
+  if(bp) bp.addEventListener('click', () => window.print());
+  const bc = document.getElementById('btnCloseSheet');
+  if(bc) bc.addEventListener('click', closeSheet);
   if(!(cached && cached.v)){
     fetchDesc(p).then(d => {
       const el = document.getElementById('sheetDesc');
