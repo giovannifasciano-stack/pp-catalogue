@@ -92,10 +92,21 @@ body.sheet-open{overflow:hidden}
 .sheet-btns .bprint{background:#1a2238;color:#fff}
 .sheet-btns .bclose{background:#eee;color:#1a2238}
 @media print{
+  @page{margin:10mm}
+  html,body{background:#fff!important;-webkit-print-color-adjust:economy;print-color-adjust:economy}
   body.sheet-open > *:not(#sheetOverlay){display:none!important}
-  #sheetOverlay{position:static;background:#fff;padding:0;overflow:visible}
-  .sheet{border-radius:0;max-width:none;padding:10px}
-  .sheet .photo{max-height:50vh}
+  #sheetOverlay{position:static!important;inset:auto;background:#fff!important;padding:0!important;margin:0;overflow:visible;height:auto;width:auto;backdrop-filter:none}
+  .sheet{background:#fff!important;border-radius:0;max-width:none!important;width:auto!important;margin:0;padding:0;box-shadow:none;page-break-inside:avoid}
+  .sheet .brand{font-size:10px;letter-spacing:3px}
+  .sheet h1{font-size:22px;margin:4px 0 1px}
+  .sheet .scol{font-size:11px;margin-bottom:10px}
+  .sheet .photo{max-width:52%;max-height:78mm;margin:0 auto 10px}
+  .sheet .smat{font-size:10.5px;margin-bottom:4px}
+  .sheet .sdesc{font-size:10px;line-height:1.35;max-width:none;margin-bottom:8px}
+  .sheet .tc{margin-bottom:5px}
+  .sheet .tct{font-size:8px;letter-spacing:1.4px}
+  .sheet .sprices .price{font-size:13px;margin:1px 0}
+  .sheet .ssrc{margin-top:10px;font-size:8px}
   .sheet-btns{display:none!important}
 }
 .card .ref{cursor:pointer;text-decoration:underline;text-decoration-color:transparent;transition:text-decoration-color .15s}
