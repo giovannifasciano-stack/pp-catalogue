@@ -67,7 +67,9 @@ main{padding:8px 16px}
 .sheet .scol{font-size:13px;color:#666;margin-bottom:20px}
 .sheet .photo{max-width:75%;max-height:44vh;object-fit:contain;margin:0 auto 22px;display:block}
 .sheet .smat{font-size:13px;line-height:1.6;max-width:480px;margin:0 auto 6px;color:#333}
-.sheet .sdesc{font-size:13px;line-height:1.65;max-width:480px;margin:0 auto 16px;color:#333}
+.sheet .sdesc{font-size:12.5px;line-height:1.6;max-width:500px;margin:0 auto 16px;color:#333;text-align:left}
+.sheet .tc{margin:0 0 9px}
+.sheet .tct{display:block;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#b08d3f;margin-bottom:2px}
 .sheet .spr{font-family:'DM Mono',monospace;font-size:16px;color:#b08d3f;margin:3px 0}
 .sheet .spr span{font-size:10px;color:#999}
 .sheet .ssrc{margin-top:26px;font-family:'DM Mono',monospace;font-size:9px;color:#aaa}
@@ -381,8 +383,41 @@ function renderChips(cols, byCol){
   for(const c of cols) mk(c, c, byCol[c].length);
 }
 
-let descCache = (() => { try{ const r = localStorage.getItem('pp_desc_v1'); return r ? JSON.parse(r) : {}; }catch(e){ return {}; } })();
-function saveDesc(){ try{ localStorage.setItem('pp_desc_v1', JSON.stringify(descCache)); }catch(e){} }
+let descCache = (() => { try{ const r = localStorage.getItem('pp_desc_v2'); return r ? JSON.parse(r) : {}; }catch(e){ return {}; } })();
+function saveDesc(){ try{ localStorage.setItem('pp_desc_v2', JSON.stringify(descCache)); }catch(e){} }
+// Estrae le sezioni di "Technical characteristics" dalla pagina prodotto Patek
+function parseTech(doc){
+  const heads = Array.from(doc.querySelectorAll('h1,h2,h3,h4'));
+  const techIdx = heads.findIndex(h => /technical\s+characteristics/i.test(h.textContent));
+  if(techIdx === -1) return null;
+  const tech = heads[techIdx];
+  const stopRe = /instructions\s+for\s+use|other\s+models|similar\s+watches|explore\s+more/i;
+  const secs = [];
+  for(let i = techIdx + 1; i < heads.length; i++){
+    const h = heads[i];
+    const title = h.textContent.trim();
+    if(stopRe.test(title) || h.tagName === 'H1') break;
+    if(!title || title.length > 40) continue;
+    // testo: fratelli successivi fino al prossimo heading
+    let body = '';
+    let n = h.nextSibling;
+    let guard = 0;
+    while(n && guard++ < 40){
+      if(n.nodeType === 1 && /^H[1-6]$/.test(n.tagName)) break;
+      if(n.nodeType === 1 && n.querySelector && n.querySelector('h1,h2,h3,h4')) break;
+      const t = (n.textContent || '').trim();
+      if(t) body += (body ? ' ' : '') + t;
+      n = n.nextSibling;
+    }
+    if(!body && h.parentElement){
+      body = h.parentElement.textContent.replace(title, '').trim();
+    }
+    body = body.replace(/\s+/g, ' ').replace(/\b(Front|Back|Download)\b\s*$/g, '').trim();
+    if(body.length > 3) secs.push({t: title, b: body.slice(0, 600)});
+    if(secs.length >= 6) break;
+  }
+  return secs.length ? secs : null;
+}
 async function fetchDesc(p){
   const c = descCache[p.ref];
   if(c && Date.now() - c.ts < USD_TTL) return c.v;
@@ -390,17 +425,13 @@ async function fetchDesc(p){
     const r = await fetch(PROXY + encodeURIComponent(p.url), {cache:'no-store'});
     const t = await r.text();
     const doc = new DOMParser().parseFromString(t, 'text/html');
-    let d = '';
-    const og = doc.querySelector('meta[property="og:description"]') || doc.querySelector('meta[name="description"]');
-    if(og) d = (og.getAttribute('content') || '').trim();
-    if(d.length < 30){
-      const cand = doc.querySelector('.product-description, .description, [class*="description"] p, article p');
-      if(cand) d = cand.textContent.trim();
-    }
-    d = d.replace(/\s+/g, ' ').slice(0, 700);
-    if(d.length > 30){ descCache[p.ref] = {v: d, ts: Date.now()}; saveDesc(); return d; }
+    const secs = parseTech(doc);
+    if(secs){ descCache[p.ref] = {v: secs, ts: Date.now()}; saveDesc(); return secs; }
   }catch(e){}
   return null;
+}
+function descHTML(secs){
+  return secs.map(s => '<div class="tc"><span class="tct">' + esc(s.t) + '</span>' + esc(s.b) + '</div>').join('');
 }
 function closeSheet(){
   document.getElementById('sheetOverlay').classList.remove('open');
@@ -416,7 +447,7 @@ function openSheet(p){
   if(live != null) prices += '<div class="spr">$ ' + live.toLocaleString('it-IT') + ' <span>listino USA</span></div>';
   if(r && r[1] === 'CHF') prices += '<div class="spr">CHF ' + r[0].toLocaleString('it-IT') + ' <span>listino</span></div>';
   const cached = descCache[p.ref];
-  const descInit = (cached && cached.v) ? esc(cached.v) : '<span style="color:#bbb">caricamento descrizione\u2026</span>';
+  const descInit = (cached && cached.v) ? descHTML(cached.v) : '<span style="color:#bbb">caricamento caratteristiche tecniche\u2026</span>';
   box.innerHTML =
     '<div class="brand">Patek Philippe</div>' +
     '<h1>' + esc(p.ref) + '</h1>' +
@@ -437,8 +468,8 @@ function openSheet(p){
     fetchDesc(p).then(d => {
       const el = document.getElementById('sheetDesc');
       if(!el) return;
-      if(d) el.textContent = d;
-      else el.innerHTML = p.mat ? '' : '<span style="color:#bbb">descrizione non disponibile</span>';
+      if(d) el.innerHTML = descHTML(d);
+      else el.innerHTML = '<span style="color:#bbb">caratteristiche non disponibili</span>';
     });
   }
 }
