@@ -434,13 +434,24 @@ function descHTML(secs){
   return secs.map(s => '<div class="tc"><span class="tct">' + esc(s.t) + '</span>' + esc(s.b) + '</div>').join('');
 }
 function closeSheet(){
-  document.getElementById('sheetOverlay').classList.remove('open');
+  const o = document.getElementById('sheetOverlay');
+  if(o) o.classList.remove('open');
   document.body.classList.remove('sheet-open');
 }
 document.addEventListener('keydown', e => { if(e.key === 'Escape') closeSheet(); });
+function ensureSheet(){
+  let ov = document.getElementById('sheetOverlay');
+  if(!ov){
+    ov = document.createElement('div');
+    ov.id = 'sheetOverlay';
+    ov.innerHTML = '<div class="sheet" id="sheetBox"></div>';
+    document.body.appendChild(ov);
+  }
+  return ov;
+}
 function openSheet(p){
+  const ov = ensureSheet();
   const box = document.getElementById('sheetBox');
-  const ov = document.getElementById('sheetOverlay');
   const live = usdOf(p.ref);
   const r = RETAIL[p.ref];
   let prices = '';
@@ -540,5 +551,6 @@ document.getElementById('search').addEventListener('input', render);
 refresh();
 })();
 </script>
+<div id="sheetOverlay"><div class="sheet" id="sheetBox"></div></div>
 </body>
 </html>
