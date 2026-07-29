@@ -76,6 +76,7 @@ main{padding:8px 16px}
 .sheet .tct{display:block;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#b08d3f;margin-bottom:2px}
 .sheet .spr{font-family:'DM Mono',monospace;font-size:16px;color:#b08d3f;margin:3px 0}
 .sheet .sprices .price{font-family:'DM Mono',monospace;font-size:16px;color:#b08d3f;margin:3px 0}
+.sheet .sprices .price.wait{color:#bbb;font-size:13px}
 .sheet .spr span{font-size:10px;color:#999}
 .sheet .ssrc{margin-top:26px;font-family:'DM Mono',monospace;font-size:9px;color:#aaa}
 .sheet-btns{display:flex;gap:10px;justify-content:center;margin-top:22px}
@@ -99,6 +100,7 @@ main{padding:8px 16px}
 .meta .price.est{font-size:10.5px;color:var(--dim);margin-top:2px}
 .meta .prices{margin-top:6px}
 .meta .prices .price{font-family:'DM Mono',monospace;font-size:12.5px;color:var(--gold2);margin:1px 0;letter-spacing:.02em}
+.meta .prices .price.wait{color:var(--dim);opacity:.45}
 .badge{position:absolute;top:8px;left:8px;font-family:'DM Mono',monospace;font-size:9.5px;font-weight:500;letter-spacing:.08em;padding:3px 8px;border-radius:6px;z-index:2;background:var(--green);color:#0a1428}
 
 #empty{display:none;text-align:center;padding:60px 20px;color:var(--dim);font-size:14px}
@@ -263,8 +265,11 @@ async function viaRoute(i, url){
   return parsePrice(await r.text());
 }
 // sonda: scopre quale uscita restituisce quale valuta ufficiale
+let probing = null;
 async function probeRoutes(sampleUrl){
   if(routeMap && Date.now() - routeMap.ts < ROUTE_TTL) return routeMap;
+  if(probing) return probing;
+  probing = (async () => {
   const map = {};
   for(let i = 0; i < ROUTES.length; i++){
     try{
@@ -272,9 +277,11 @@ async function probeRoutes(sampleUrl){
       if(p && map[p.cur] == null) map[p.cur] = i;
     }catch(e){}
   }
-  routeMap = {map, ts: Date.now()};
-  try{ localStorage.setItem(ROUTE_KEY, JSON.stringify(routeMap)); }catch(e){}
-  return routeMap;
+    routeMap = {map, ts: Date.now()};
+    try{ localStorage.setItem(ROUTE_KEY, JSON.stringify(routeMap)); }catch(e){}
+    return routeMap;
+  })();
+  try{ return await probing; } finally { probing = null; }
 }
 // prezzo dalla tua uscita: e' quello che vedresti tu aprendo patek.com
 async function loadPrice(ref, url){
@@ -326,11 +333,41 @@ function priceRows(ref){
   const rt = RETAIL[ref];
   if(rt && rec[rt[1]] == null) rec[rt[1]] = rt[0];
   let out = '';
-  let any = false;
   for(const cur of ['CHF','EUR','USD']){
-    if(rec[cur] != null){ out += '<div class="price">' + fmt(cur, rec[cur]) + '</div>'; any = true; }
+    out += rec[cur] != null
+      ? '<div class="price">' + fmt(cur, rec[cur]) + '</div>'
+      : '<div class="price wait">' + (cur === 'USD' ? '$' : (cur === 'EUR' ? '\u20AC' : 'CHF')) + ' \u2026</div>';
   }
-  return any ? out : '<div class="price"><span style="opacity:.4">\u2026</span></div>';
+  return out;
+}
+// coda: al massimo tre letture in parallelo, cosi' le card si popolano senza intasare la rete
+const pq = [];
+let pqRunning = 0;
+function pqPush(fn){
+  pq.push(fn);
+  pqNext();
+}
+function pqNext(){
+  while(pqRunning < 3 && pq.length){
+    const fn = pq.shift();
+    pqRunning++;
+    Promise.resolve().then(fn).catch(() => {}).finally(() => { pqRunning--; pqNext(); });
+  }
+}
+function refreshPrices(ref){
+  document.querySelectorAll('[data-pp="'+CSS.escape(ref)+'"]').forEach(el => { el.innerHTML = priceRows(ref); });
+}
+// carica i tre listini per una card
+async function loadCard(ref, url){
+  const need = () => {
+    const rec = priceOf(ref) || {};
+    return ['CHF','EUR','USD'].some(c => rec[c] == null);
+  };
+  if(!need()) return;
+  await loadPrice(ref, url);
+  refreshPrices(ref);
+  if(need()) await loadAllMarkets(ref, url, () => refreshPrices(ref));
+  refreshPrices(ref);
 }
 function usdOf(ref){
   const rec = priceOf(ref);
@@ -341,7 +378,7 @@ const priceObserver = ('IntersectionObserver' in window) ? new IntersectionObser
     if(en.isIntersecting){
       const el = en.target;
       priceObserver.unobserve(el);
-      loadPrice(el.dataset.ref, el.dataset.purl);
+      pqPush(() => loadCard(el.dataset.ref, el.dataset.purl));
     }
   }
 }, {rootMargin: '200px'}) : null;
@@ -483,7 +520,9 @@ function render(){
       if(rf) rf.addEventListener('click', () => window.open(p.url, '_blank', 'noopener'));
       grid.appendChild(card);
       const priceEl = card.querySelector('[data-pp]');
-      if(priceEl && priceObserver && !priceOf(p.ref)){
+      const recNow = priceOf(p.ref) || {};
+      const missing = ['CHF','EUR','USD'].some(c => recNow[c] == null);
+      if(priceEl && priceObserver && missing){
         priceEl.dataset.ref = p.ref;
         priceEl.dataset.purl = p.url;
         priceObserver.observe(priceEl);
