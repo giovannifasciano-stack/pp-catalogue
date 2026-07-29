@@ -74,7 +74,9 @@ main{padding:8px 16px}
 body.sheet-open{overflow:hidden}
 @supports (-webkit-touch-callout:none){body.sheet-open #sheetOverlay{position:fixed;height:100dvh}}
 .sheet{background:#fff;color:#1a2238;max-width:640px;margin:0 auto;border-radius:16px;padding:26px 20px 0;text-align:center;position:relative}
-.sheet .brand{font-size:12px;letter-spacing:4px;text-transform:uppercase;color:#b08d3f}
+.sheet .brand{margin-bottom:2px}
+.sheet .pplogo{display:block;height:34px;width:auto;margin:0 auto 6px;object-fit:contain}
+.sheet .ppword{font-family:Georgia,'Times New Roman',serif;font-size:15px;letter-spacing:5px;text-transform:uppercase;color:#1a2238}
 .sheet h1{font-weight:300;font-size:28px;margin:6px 0 2px;color:#1a2238}
 .sheet .scol{font-size:13px;color:#666;margin-bottom:20px}
 .sheet .photo{max-width:75%;max-height:44vh;object-fit:contain;margin:0 auto 22px;display:block}
@@ -97,7 +99,8 @@ body.sheet-open{overflow:hidden}
   body.sheet-open > *:not(#sheetOverlay){display:none!important}
   #sheetOverlay{position:static!important;inset:auto;background:#fff!important;padding:0!important;margin:0;overflow:visible;height:auto;width:auto;backdrop-filter:none}
   .sheet{background:#fff!important;border-radius:0;max-width:none!important;width:auto!important;margin:0;padding:0;box-shadow:none;page-break-inside:avoid}
-  .sheet .brand{font-size:10px;letter-spacing:3px}
+  .sheet .pplogo{height:26px;margin-bottom:4px}
+  .sheet .ppword{font-size:12px;letter-spacing:4px}
   .sheet h1{font-size:22px;margin:4px 0 1px}
   .sheet .scol{font-size:11px;margin-bottom:10px}
   .sheet .photo{max-width:52%;max-height:78mm;margin:0 auto 10px}
@@ -609,12 +612,38 @@ function parseTech(raw){
   const out = secs.filter(s => s.b.length > 3);
   return out.length ? out.slice(0, 6) : null;
 }
+let ppLogo = (() => { try{ return localStorage.getItem('pp_logo_v1') || null; }catch(e){ return null; } })();
+function findLogo(raw){
+  const cands = [];
+  const re = /(?:src|href|content)\s*=\s*["']([^"']+\.(?:svg|png))["']/gi;
+  let m;
+  while((m = re.exec(raw))){
+    const u = m[1];
+    if(/logo|calatrava|brand/i.test(u) && !/facebook|instagram|twitter|apple|google/i.test(u)) cands.push(u);
+  }
+  if(!cands.length) return null;
+  let u = cands.sort((a, b) => (/\.svg$/i.test(b) ? 1 : 0) - (/\.svg$/i.test(a) ? 1 : 0))[0];
+  if(u.startsWith('//')) u = 'https:' + u;
+  else if(u.startsWith('/')) u = 'https://www.patek.com' + u;
+  else if(!/^https?:/i.test(u)) u = 'https://www.patek.com/' + u;
+  return u;
+}
+function logoIMG(){
+  if(!ppLogo) return '';
+  const via = 'https://images.weserv.nl/?url=' + encodeURIComponent(ppLogo.replace(/^https?:\/\//,'')) + '&w=420&output=png';
+  return '<img class="pplogo" src="' + esc(via) + '" alt="" onerror="this.style.display=\'none\'">';
+}
 async function fetchDesc(p){
   const c = descCache[p.ref];
   if(c && Date.now() - c.ts < PRICE_TTL) return c.v;
   try{
     const r = await fetch(PROXY + encodeURIComponent(p.url), {cache:'no-store'});
     const t = await r.text();
+    if(!ppLogo){
+      const lg = findLogo(t);
+      if(lg){ ppLogo = lg; try{ localStorage.setItem('pp_logo_v1', lg); }catch(e){}
+        const h = document.getElementById('sheetHead'); if(h) h.innerHTML = logoIMG() + '<div class="ppword">Patek Philippe</div>'; }
+    }
     const secs = parseTech(t);
     if(secs){ descCache[p.ref] = {v: secs, ts: Date.now()}; saveDesc(); return secs; }
   }catch(e){}
@@ -647,7 +676,7 @@ function openSheet(p){
   const cached = descCache[p.ref];
   const descInit = (cached && cached.v) ? descHTML(cached.v) : '<span style="color:#bbb">caricamento caratteristiche tecniche\u2026</span>';
   box.innerHTML =
-    '<div class="brand">Patek Philippe</div>' +
+    '<div class="brand" id="sheetHead">' + logoIMG() + '<div class="ppword">Patek Philippe</div></div>' +
     '<h1>' + esc(p.ref) + '</h1>' +
     '<div class="scol">' + esc(p.col || '') + '</div>' +
     (p.img ? '<img class="photo" src="' + esc(bigURL(p.img)) + '">' : '') +
