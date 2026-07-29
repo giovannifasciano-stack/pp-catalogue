@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>PP Catalogue</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Cormorant+Garamond:wght@500;600;700&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#221710; --navy2:#2d1f15; --card:#362619; --line:#4d3826;
+  --gold:#b08d57; --gold2:#d8bc8a; --txt:#f0e8da; --dim:#a89680;
+  --green:#8fb573; --red:#c96a5e;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--navy);color:var(--txt);font-family:'Outfit',sans-serif;min-height:100vh;padding-bottom:60px}
+
+header{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,var(--navy) 70%,rgba(10,20,40,.92));backdrop-filter:blur(8px);padding:14px 16px 10px;border-bottom:1px solid var(--line)}
+.brandline{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+h1{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:center;gap:10px}
+h1 span{color:var(--gold2)}
+h1 img{width:26px;height:26px;border-radius:50%;background:#fff;padding:2px}
+#lastSync{font-family:'DM Mono',monospace;font-size:10px;color:var(--dim)}
+
+.toolbar{display:flex;gap:8px;margin-top:12px}
+.toolbar input{flex:1;background:var(--navy2);border:1px solid var(--line);border-radius:10px;color:var(--txt);font-family:'DM Mono',monospace;font-size:13px;padding:9px 12px;outline:none}
+.toolbar input:focus{border-color:var(--gold)}
+button{cursor:pointer;border:none;font-family:'Outfit',sans-serif}
+.btn{background:var(--navy2);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:9px 13px;font-size:13px;font-weight:500;white-space:nowrap}
+.btn.gold{background:var(--gold);color:#14233f;border-color:var(--gold);font-weight:600}
+
+.chips{display:flex;gap:7px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;background:var(--navy2);border:1px solid var(--line);color:var(--dim);border-radius:999px;padding:6px 13px;font-size:12px;font-weight:500}
+.chip b{color:var(--txt);font-weight:600}
+.chip.active{background:var(--gold);border-color:var(--gold);color:#14233f}
+.chip.active b{color:#14233f}
+
+#status{padding:10px 16px;font-family:'DM Mono',monospace;font-size:12px;color:var(--dim)}
+#status .hl{color:var(--gold2)}
+
+#newsbar{display:none;margin:0 16px 4px;padding:12px 14px;background:linear-gradient(135deg,#2e2a14,#362619);border:1px solid var(--gold);border-radius:12px}
+#newsbar.show{display:block}
+#newsbar h3{font-size:13px;color:var(--gold2);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
+#newsbar p{font-size:12.5px;color:var(--dim);line-height:1.5}
+#newsbar p b{color:var(--txt)}
+
+main{padding:8px 16px}
+.brand-section{margin-top:22px}
+.brand-head{display:flex;align-items:baseline;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:7px;margin-bottom:12px}
+.brand-head h2{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--gold2)}
+.brand-head .cnt{font-family:'DM Mono',monospace;font-size:11px;color:var(--dim)}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.card{position:relative;display:block;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;transition:border-color .15s}
+.card:active{border-color:var(--gold)}
+.thumb{width:100%;aspect-ratio:1;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.thumb img{width:100%;height:100%;object-fit:contain}
+.thumb .noimg{font-family:'DM Mono',monospace;font-size:10px;color:#999}
+.meta{padding:9px 10px 11px}
+.meta .ref{font-family:'DM Mono',monospace;font-size:14px;color:var(--gold2)}
+.meta .mat{font-size:12px;color:var(--txt);margin-top:4px;line-height:1.3;min-height:2.6em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.meta .col{font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;margin-top:5px}
+.meta .price{font-family:'DM Mono',monospace;font-size:14px;color:var(--gold2);margin-top:6px}
+.meta .price.est{font-size:10.5px;color:var(--dim);margin-top:2px}
+.badge{position:absolute;top:8px;left:8px;font-family:'DM Mono',monospace;font-size:9.5px;font-weight:500;letter-spacing:.08em;padding:3px 8px;border-radius:6px;z-index:2;background:var(--green);color:#0a1428}
+
+#empty{display:none;text-align:center;padding:60px 20px;color:var(--dim);font-size:14px}
+#loader{display:none;text-align:center;padding:50px 20px;font-family:'DM Mono',monospace;font-size:12px;color:var(--gold);letter-spacing:.15em}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--gold);border-radius:50%;animation:sp 1s linear infinite;vertical-align:-2px;margin-right:8px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){.spin{animation-duration:2.5s}}
+
+footer{position:fixed;bottom:0;left:0;right:0;padding:8px 16px calc(8px + env(safe-area-inset-bottom));background:rgba(10,20,40,.94);backdrop-filter:blur(8px);border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center}
+footer .src{font-family:'DM Mono',monospace;font-size:10px;color:var(--dim)}
+footer .src a{color:var(--gold);text-decoration:none}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brandline">
+    <h1><img src="https://www.google.com/s2/favicons?domain=patek.com&amp;sz=64" alt="">Patek Philippe <span>Catalogue</span></h1>
+    <div id="lastSync">—</div>
+  </div>
+  <div class="toolbar">
+    <input id="search" type="search" placeholder="Cerca referenza, materiale…" autocomplete="off">
+    <button class="btn gold" id="btnRefresh">Aggiorna</button>
+  </div>
+  <div class="chips" id="chips"></div>
+</header>
+
+<div id="status"></div>
+
+<div id="newsbar">
+  <h3>Novità a catalogo</h3>
+  <p id="newsTxt"></p>
+</div>
+
+<div id="loader"><span class="spin"></span>LETTURA CATALOGO PATEK…</div>
+<main id="main"></main>
+<div id="empty">Nessun risultato con questi filtri.</div>
+
+<footer>
+  <div class="src">patek.com · listino EU gen 2026 (€) · novità W&amp;W in CHF</div>
+  <button class="btn" id="btnSeen">Segna tutto come visto</button>
+</footer>
+
+<script>
+(() => {
+const FINDER = 'https://www.patek.com/en/collection/watch-finder';
+const SNAP_KEY = 'pp_snapshot_v1';
+const CAT_KEY = 'pp_catalog_v1';
+const CAT_TTL = 24 * 60 * 60 * 1000;
+
+const COLLECTIONS = {
+  'grand-complications':'Grand Complications',
+  'complications':'Complications',
+  'calatrava':'Calatrava',
+  'gondolo':'Gondolo',
+  'golden-ellipse':'Golden Ellipse',
+  'cubitus':'Cubitus',
+  'nautilus':'Nautilus',
+  'aquanaut':'Aquanaut',
+  'twenty4':'Twenty~4',
+  'pocket-watches':'Pocket Watches',
+  'rare-handcrafts':'Rare Handcrafts'
+};
+
+const RETAIL = {
+  '5810/1G-001':[75000,'CHF'],
+  '5810G-001':[60000,'CHF'],
+  '5610/1P-001':[90000,'CHF'],
+  '958G-001':[205000,'CHF'],
+  '6105G-001':[350000,'CHF'],
+  '5840P-001':[150000,'CHF'],
+  '5249R-001':[320000,'CHF'],
+  '7047G-001':[445000,'CHF'],
+  '5322G-001':[225000,'CHF'],
+  '5322G-010':[225000,'CHF'],
+  '5738G-001':[34400,'CHF'],
+  '3738/100G-014':[32400,'CHF']
+};
+
+let items = [];
+let snapshot = null;
+let added = [];
+const PROXY = 'https://watch-proxy.owscan.workers.dev/?u=';
+let activeCol = 'ALL';
+let usdCache = (() => { try{ const r = localStorage.getItem('pp_usd_v1'); return r ? JSON.parse(r) : {}; }catch(e){ return {}; } })();
+const USD_TTL = 7 * 24 * 60 * 60 * 1000;
+const usdPending = new Set();
+function saveUsd(){ try{ localStorage.setItem('pp_usd_v1', JSON.stringify(usdCache)); }catch(e){} }
+function usdOf(ref){
+  const c = usdCache[ref];
+  return (c && Date.now() - c.ts < USD_TTL) ? c.v : null;
+}
+async function loadUSD(ref, url){
+  if(usdOf(ref) != null || usdPending.has(ref)) return;
+  usdPending.add(ref);
+  try{
+    const r = await fetch(PROXY + encodeURIComponent(url), {cache:'no-store'});
+    const t = await r.text();
+    const m = t.match(/\$\s?([\d][\d,]{3,})/);
+    if(m){
+      const v = +m[1].replace(/[^0-9]/g, '');
+      if(v > 1000){
+        usdCache[ref] = {v, ts: Date.now()};
+        saveUsd();
+        document.querySelectorAll('[data-usd="'+CSS.escape(ref)+'"]').forEach(el => {
+          el.textContent = '$' + v.toLocaleString('it-IT');
+          el.style.opacity = '';
+        });
+      }
+    }
+  }catch(e){}
+  finally{ usdPending.delete(ref); }
+}
+const priceObserver = ('IntersectionObserver' in window) ? new IntersectionObserver(entries => {
+  for(const en of entries){
+    if(en.isIntersecting){
+      const el = en.target;
+      priceObserver.unobserve(el);
+      loadUSD(el.dataset.ref, el.dataset.purl);
+    }
+  }
+}, {rootMargin: '200px'}) : null;
+
+let memStore = {};
+
+function lsGet(k){ try{ return localStorage.getItem(k); }catch(e){ return memStore[k] || null; } }
+function lsSet(k, v){ try{ localStorage.setItem(k, v); }catch(e){ memStore[k] = v; } }
+
+// ---------- fetch HTML con fallback proxy ----------
+async function getHTML(url){
+  const routes = [
+    u => PROXY + encodeURIComponent(u),
+    u => u,
+    u => 'https://corsproxy.io/?url=' + encodeURIComponent(u),
+    u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
+    u => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u)
+  ];
+  let lastErr = null;
+  for(const route of routes){
+    try{
+      const r = await fetch(route(url), {cache:'no-store'});
+      if(!r.ok) throw new Error('HTTP ' + r.status);
+      const html = await r.text();
+      if(html && html.length > 5000 && /collection/i.test(html)) return html;
+      throw new Error('Risposta non valida');
+    }catch(e){ lastErr = e; }
+  }
+  throw lastErr || new Error('Nessuna via di accesso disponibile');
+}
+
+// ---------- parsing ----------
+function slugToRef(slug){
+  const s = slug.toUpperCase().split('-');
+  if(s.length >= 3) return s[0] + '/' + s[1] + '-' + s.slice(2).join('-');
+  return s.join('-');
+}
+function parseCatalog(html){
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const seen = new Set();
+  const out = [];
+  doc.querySelectorAll('a[href*="/collection/"]').forEach(a => {
+    const href = a.getAttribute('href') || '';
+    const m = href.match(/\/collection\/([a-z0-9-]+)\/([a-z0-9-]+)\/?$/i);
+    if(!m) return;
+    const colSlug = m[1].toLowerCase();
+    if(!COLLECTIONS[colSlug]) return;               // esclude link di navigazione
+    if(/all-watches|all-models/.test(m[2])) return;
+    const slug = m[2].toLowerCase();
+    const id = colSlug + '/' + slug;
+    if(seen.has(id)) return;
+    seen.add(id);
+
+    const ref = slugToRef(slug);
+    const colLabel = COLLECTIONS[colSlug];
+
+    // materiale/nome: testo dell'anchor dopo referenza e collezione
+    let mat = '';
+    const t = (a.textContent || '').replace(/\s+/g, ' ').trim();
+    const ri = t.indexOf(ref);
+    if(ri !== -1){
+      let rest = t.slice(ri + ref.length);
+      const ci = rest.indexOf(colLabel);
+      if(ci !== -1) rest = rest.slice(ci + colLabel.length);
+      mat = rest.trim();
+    }
+
+    // immagine: img dentro l'anchor (anche lazy)
+    let img = null;
+    const im = a.querySelector('img');
+    if(im) img = im.getAttribute('src') || im.getAttribute('data-src') || (im.getAttribute('srcset')||'').split(' ')[0] || null;
+    if(img && img.startsWith('/')) img = 'https://www.patek.com' + img;
+
+    out.push({
+      id, ref, col: colLabel, mat,
+      url: href.startsWith('http') ? href : 'https://www.patek.com' + href,
+      img
+    });
+  });
+  return out;
+}
+
+// ---------- novità ----------
+function computeAdded(){
+  added = [];
+  if(!snapshot) return;
+  for(const p of items){
+    if(!snapshot.ids.includes(p.id)) added.push(p.id);
+  }
+}
+function renderNews(){
+  const bar = document.getElementById('newsbar');
+  if(!snapshot || !added.length){ bar.classList.remove('show'); return; }
+  const names = items.filter(p => added.includes(p.id)).slice(0,6).map(p => esc(p.ref));
+  document.getElementById('newsTxt').innerHTML =
+    '<b>' + added.length + ' nuove referenze</b> dall\'ultima visita (' +
+    new Date(snapshot.ts).toLocaleDateString('it-IT') + '): ' + names.join(' · ') +
+    (added.length > 6 ? ' …' : '');
+  bar.classList.add('show');
+}
+
+// ---------- render ----------
+function render(){
+  const q = document.getElementById('search').value.trim().toLowerCase();
+  const main = document.getElementById('main');
+  main.innerHTML = '';
+
+  const byCol = {};
+  for(const p of items) (byCol[p.col] = byCol[p.col] || []).push(p);
+  const cols = Object.values(COLLECTIONS).filter(c => byCol[c]);
+
+  renderChips(cols, byCol);
+
+  let shown = 0;
+  for(const c of cols){
+    if(activeCol !== 'ALL' && c !== activeCol) continue;
+    let list = byCol[c];
+    if(q) list = list.filter(p => (p.ref + ' ' + p.mat + ' ' + p.col).toLowerCase().includes(q));
+    if(!list.length) continue;
+
+    const sec = document.createElement('section');
+    sec.className = 'brand-section';
+    sec.innerHTML = '<div class="brand-head"><h2>'+esc(c)+'</h2><span class="cnt">'+list.length+' modelli</span></div>';
+    const grid = document.createElement('div');
+    grid.className = 'grid';
+
+    for(const p of list){
+      const card = document.createElement('a');
+      card.className = 'card';
+      card.href = p.url;
+      card.target = '_blank'; card.rel = 'noopener';
+      card.innerHTML =
+        (added.includes(p.id) ? '<span class="badge">NEW</span>' : '') +
+        '<div class="thumb">' + (p.img ? '<img loading="lazy" src="'+esc(p.img)+'" alt="" onerror="this.parentNode.innerHTML=\'<span class=noimg>NO IMG</span>\'">' : '<span class="noimg">NO IMG</span>') + '</div>' +
+        '<div class="meta"><div class="ref">'+esc(p.ref)+'</div>' +
+        '<div class="mat">'+esc(p.mat || '')+'</div>' +
+        retailLine(p.ref) +
+        '<div class="col">'+esc(p.col)+'</div></div>';
+      grid.appendChild(card);
+      const priceEl = card.querySelector('[data-usd]');
+      if(priceEl && priceObserver && usdOf(p.ref) == null){
+        priceEl.dataset.ref = p.ref;
+        priceEl.dataset.purl = p.url;
+        priceObserver.observe(priceEl);
+      }
+      shown++;
+    }
+    sec.appendChild(grid);
+    main.appendChild(sec);
+  }
+  document.getElementById('empty').style.display = shown ? 'none' : 'block';
+}
+
+function renderChips(cols, byCol){
+  const box = document.getElementById('chips');
+  box.innerHTML = '';
+  const mk = (label, key, count) => {
+    const c = document.createElement('button');
+    c.className = 'chip' + (activeCol === key ? ' active' : '');
+    c.innerHTML = esc(label) + (count != null ? ' <b>'+count+'</b>' : '');
+    c.onclick = () => { activeCol = key; render(); };
+    box.appendChild(c);
+  };
+  mk('Tutte', 'ALL', items.length);
+  for(const c of cols) mk(c, c, byCol[c].length);
+}
+
+function retailLine(ref){
+  const live = usdOf(ref);
+  let h = '<div class="price" data-usd="'+esc(ref)+'">' +
+    (live != null ? '$' + live.toLocaleString('it-IT') : '<span style="opacity:.4">$ \u2026</span>') + '</div>';
+  const r = RETAIL[ref];
+  if(r && r[1] === 'CHF') h += '<div class="price est">CHF ' + r[0].toLocaleString('it-IT') + ' listino</div>';
+  return h;
+}
+function esc(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
+
+// ---------- azioni ----------
+async function refresh(force){
+  const loader = document.getElementById('loader');
+  const status = document.getElementById('status');
+  loader.style.display = 'block';
+  status.textContent = '';
+  try{
+    let usedCache = false;
+    if(!force){
+      const raw = lsGet(CAT_KEY);
+      if(raw){
+        try{
+          const c = JSON.parse(raw);
+          if(Date.now() - c.ts < CAT_TTL && c.items && c.items.length){
+            items = c.items; usedCache = true;
+          }
+        }catch(e){}
+      }
+    }
+    if(!usedCache){
+      const html = await getHTML(FINDER);
+      const parsed = parseCatalog(html);
+      if(!parsed.length) throw new Error('catalogo non leggibile');
+      items = parsed;
+      lsSet(CAT_KEY, JSON.stringify({ts: Date.now(), items}));
+    }
+    snapshot = (() => { try{ const r = lsGet(SNAP_KEY); return r ? JSON.parse(r) : null; }catch(e){ return null; } })();
+    computeAdded();
+    document.getElementById('lastSync').textContent = new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+    status.innerHTML = '<span class="hl">'+items.length+'</span> modelli a catalogo · ' +
+      new Set(items.map(p=>p.col)).size + ' collezioni' + (usedCache ? ' · cache' : '');
+    renderNews();
+    render();
+  }catch(e){
+    status.innerHTML = 'Impossibile leggere il catalogo ('+esc(e.message)+'). Riprova con Aggiorna — e ricorda che nell\'anteprima di Claude le connessioni esterne sono bloccate.';
+  }finally{
+    loader.style.display = 'none';
+  }
+}
+
+function markSeen(){
+  snapshot = { ts: Date.now(), ids: items.map(p => p.id) };
+  lsSet(SNAP_KEY, JSON.stringify(snapshot));
+  computeAdded();
+  renderNews();
+  render();
+  document.getElementById('status').innerHTML = 'Snapshot salvato — alla prossima visita vedrai le nuove referenze a catalogo.';
+}
+
+document.getElementById('btnRefresh').onclick = () => refresh(true);
+document.getElementById('btnSeen').onclick = markSeen;
+document.getElementById('search').addEventListener('input', render);
+
+refresh();
+})();
+</script>
+</body>
+</html>
