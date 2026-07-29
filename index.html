@@ -21,6 +21,7 @@ header{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,var(--
 h1{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;display:flex;align-items:center;gap:10px}
 h1 span{color:var(--gold2)}
 h1 img{width:26px;height:26px;border-radius:50%;background:#fff;padding:2px}
+h1 .mark{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:#b08d3f;color:#12182b;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.5px;margin-right:6px;vertical-align:middle}
 #lastSync{font-family:'DM Mono',monospace;font-size:10px;color:var(--dim)}
 
 .toolbar{display:flex;gap:8px;margin-top:12px}
@@ -109,7 +110,7 @@ footer .src a{color:var(--gold);text-decoration:none}
 
 <header>
   <div class="brandline">
-    <h1><img src="https://www.google.com/s2/favicons?domain=patek.com&amp;sz=64" alt="">Patek Philippe <span>Catalogue</span></h1>
+    <h1><span class="mark">PP</span>Patek Philippe <span>Catalogue</span></h1>
     <div id="lastSync">—</div>
   </div>
   <div class="toolbar">
@@ -174,6 +175,18 @@ let items = [];
 let snapshot = null;
 let added = [];
 const PROXY = 'https://watch-proxy.owscan.workers.dev/?u=';
+function imgFail(el){
+  if(el.dataset.orig){
+    const o = el.dataset.orig;
+    delete el.dataset.orig;
+    el.src = 'https://wsrv.nl/?url=' + encodeURIComponent(o.replace(/^https?:\/\//,'')) + '&w=440&output=webp';
+  }else{
+    el.parentNode.innerHTML = '<span class="noimg">NO IMG</span>';
+  }
+}
+function bigURL(u){
+  return 'https://images.weserv.nl/?url=' + encodeURIComponent(u.replace(/^https?:\/\//,'')) + '&w=1100&output=webp&q=88';
+}
 function thumbURL(u){
   return 'https://images.weserv.nl/?url=' + encodeURIComponent(u.replace(/^https?:\/\//,'')) + '&w=440&h=440&fit=contain&output=webp&q=72';
 }
@@ -226,7 +239,6 @@ function lsSet(k, v){ try{ localStorage.setItem(k, v); }catch(e){ memStore[k] = 
 async function getHTML(url){
   const routes = [
     u => PROXY + encodeURIComponent(u),
-    u => u,
     u => 'https://corsproxy.io/?url=' + encodeURIComponent(u),
     u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
     u => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u)
@@ -344,7 +356,7 @@ function render(){
       card.className = 'card';
       card.innerHTML =
         (added.includes(p.id) ? '<span class="badge">NEW</span>' : '') +
-        '<div class="thumb">' + (p.img ? '<img loading="lazy" decoding="async" src="'+esc(thumbURL(p.img))+'" data-orig="'+esc(p.img)+'" alt="" onerror="if(this.dataset.orig){this.src=this.dataset.orig;delete this.dataset.orig}else{this.parentNode.innerHTML=\'<span class=noimg>NO IMG</span>\'}">' : '<span class="noimg">NO IMG</span>') + '</div>' +
+        '<div class="thumb">' + (p.img ? '<img loading="lazy" decoding="async" src="'+esc(thumbURL(p.img))+'" data-orig="'+esc(p.img)+'" alt="" onerror="imgFail(this)">' : '<span class="noimg">NO IMG</span>') + '</div>' +
         '<div class="meta"><div class="ref">'+esc(p.ref)+'</div>' +
         '<div class="mat">'+esc(p.mat || '')+'</div>' +
         retailLine(p.ref) +
@@ -466,7 +478,7 @@ function openSheet(p){
     '<div class="brand">Patek Philippe</div>' +
     '<h1>' + esc(p.ref) + '</h1>' +
     '<div class="scol">' + esc(p.col || '') + '</div>' +
-    (p.img ? '<img class="photo" src="' + esc(p.img) + '">' : '') +
+    (p.img ? '<img class="photo" src="' + esc(bigURL(p.img)) + '">' : '') +
     (p.mat ? '<div class="smat">' + esc(p.mat) + '</div>' : '') +
     '<div class="sdesc" id="sheetDesc">' + descInit + '</div>' +
     prices +
