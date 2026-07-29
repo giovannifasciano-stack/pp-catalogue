@@ -75,6 +75,7 @@ main{padding:8px 16px}
 .sheet .tc{margin:0 0 9px}
 .sheet .tct{display:block;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#b08d3f;margin-bottom:2px}
 .sheet .spr{font-family:'DM Mono',monospace;font-size:16px;color:#b08d3f;margin:3px 0}
+.sheet .sprices .price{font-family:'DM Mono',monospace;font-size:16px;color:#b08d3f;margin:3px 0}
 .sheet .spr span{font-size:10px;color:#999}
 .sheet .ssrc{margin-top:26px;font-family:'DM Mono',monospace;font-size:9px;color:#aaa}
 .sheet-btns{display:flex;gap:10px;justify-content:center;margin-top:22px}
@@ -96,6 +97,8 @@ main{padding:8px 16px}
 .meta .col{font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;margin-top:5px}
 .meta .price{font-family:'DM Mono',monospace;font-size:14px;color:var(--gold2);margin-top:6px}
 .meta .price.est{font-size:10.5px;color:var(--dim);margin-top:2px}
+.meta .prices{margin-top:6px}
+.meta .prices .price{font-family:'DM Mono',monospace;font-size:12.5px;color:var(--gold2);margin:1px 0;letter-spacing:.02em}
 .badge{position:absolute;top:8px;left:8px;font-family:'DM Mono',monospace;font-size:9.5px;font-weight:500;letter-spacing:.08em;padding:3px 8px;border-radius:6px;z-index:2;background:var(--green);color:#0a1428}
 
 #empty{display:none;text-align:center;padding:60px 20px;color:var(--dim);font-size:14px}
@@ -209,41 +212,136 @@ function thumbURL(u){
   return 'https://images.weserv.nl/?url=' + encodeURIComponent(u.replace(/^https?:\/\//,'')) + '&w=440&h=440&fit=contain&output=webp&q=72';
 }
 let activeCol = 'ALL';
-let usdCache = (() => { try{ const r = localStorage.getItem('pp_usd_v1'); return r ? JSON.parse(r) : {}; }catch(e){ return {}; } })();
-const USD_TTL = 7 * 24 * 60 * 60 * 1000;
-const usdPending = new Set();
-function saveUsd(){ try{ localStorage.setItem('pp_usd_v1', JSON.stringify(usdCache)); }catch(e){} }
-function usdOf(ref){
-  const c = usdCache[ref];
-  return (c && Date.now() - c.ts < USD_TTL) ? c.v : null;
+
+// ---------- listini ufficiali per mercato ----------
+// patek.com serve il prezzo nella valuta del paese da cui arriva la richiesta:
+// niente conversioni, si interroga il sito da tre uscite diverse.
+const PRICE_KEY = 'pp_price_v3', ROUTE_KEY = 'pp_routes_v1';
+const PRICE_TTL = 7 * 24 * 60 * 60 * 1000;
+const ROUTE_TTL = 7 * 24 * 60 * 60 * 1000;
+let priceCache = (() => { try{ const r = localStorage.getItem(PRICE_KEY); return r ? JSON.parse(r) : {}; }catch(e){ return {}; } })();
+let routeMap = (() => { try{ const r = localStorage.getItem(ROUTE_KEY); return r ? JSON.parse(r) : null; }catch(e){ return null; } })();
+const pricePending = new Set();
+function savePrices(){ try{ localStorage.setItem(PRICE_KEY, JSON.stringify(priceCache)); }catch(e){} }
+
+// uscite disponibili: la prima e' il tuo Worker, le altre servono solo a cambiare paese di provenienza
+const ROUTES = [
+  u => PROXY + encodeURIComponent(u),
+  u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
+  u => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u),
+  u => 'https://corsproxy.io/?url=' + encodeURIComponent(u)
+];
+function cleanNum(s){
+  let x = s.replace(/[\u2019'\u00a0\s]/g, '');
+  x = x.replace(/[.,](\d{2})$/, '');
+  return +x.replace(/[^0-9]/g, '');
 }
-async function loadUSD(ref, url){
-  if(usdOf(ref) != null || usdPending.has(ref)) return;
-  usdPending.add(ref);
-  try{
-    const r = await fetch(PROXY + encodeURIComponent(url), {cache:'no-store'});
-    const t = await r.text();
-    const m = t.match(/\$\s?([\d][\d,]{3,})/);
+function parsePrice(t){
+  const tries = [
+    [/(?:CHF|SFr\.?)\s?([\d][\d\u2019'.,\s]{3,})/i, 'CHF'],
+    [/([\d][\d\u2019'.,\s]{3,})\s?(?:CHF|SFr\.?)/i, 'CHF'],
+    [/\u20AC\s?([\d][\d.,\s]{3,})/, 'EUR'],
+    [/([\d][\d.,\s]{3,})\s?\u20AC/, 'EUR'],
+    [/\$\s?([\d][\d,]{3,})/, 'USD']
+  ];
+  for(const [re, cur] of tries){
+    const m = t.match(re);
     if(m){
-      const v = +m[1].replace(/[^0-9]/g, '');
-      if(v > 1000){
-        usdCache[ref] = {v, ts: Date.now()};
-        saveUsd();
-        document.querySelectorAll('[data-usd="'+CSS.escape(ref)+'"]').forEach(el => {
-          el.textContent = '$' + v.toLocaleString('it-IT');
-          el.style.opacity = '';
-        });
-      }
+      const v = cleanNum(m[1]);
+      if(v > 1000 && v < 100000000) return {v, cur};
+    }
+  }
+  return null;
+}
+function priceOf(ref){
+  const c = priceCache[ref];
+  return (c && Date.now() - c.ts < PRICE_TTL) ? c : null;
+}
+async function viaRoute(i, url){
+  const r = await fetch(ROUTES[i](url), {cache:'no-store'});
+  if(!r.ok) throw new Error('route ' + i);
+  return parsePrice(await r.text());
+}
+// sonda: scopre quale uscita restituisce quale valuta ufficiale
+async function probeRoutes(sampleUrl){
+  if(routeMap && Date.now() - routeMap.ts < ROUTE_TTL) return routeMap;
+  const map = {};
+  for(let i = 0; i < ROUTES.length; i++){
+    try{
+      const p = await viaRoute(i, sampleUrl);
+      if(p && map[p.cur] == null) map[p.cur] = i;
+    }catch(e){}
+  }
+  routeMap = {map, ts: Date.now()};
+  try{ localStorage.setItem(ROUTE_KEY, JSON.stringify(routeMap)); }catch(e){}
+  return routeMap;
+}
+// prezzo dalla tua uscita: e' quello che vedresti tu aprendo patek.com
+async function loadPrice(ref, url){
+  if(priceOf(ref) || pricePending.has(ref)) return;
+  pricePending.add(ref);
+  try{
+    const p = await viaRoute(0, url);
+    if(p){
+      const rec = priceCache[ref] && Date.now() - priceCache[ref].ts < PRICE_TTL ? priceCache[ref] : {ts: Date.now()};
+      rec[p.cur] = p.v;
+      rec.ts = Date.now();
+      const rt = RETAIL[ref];
+      if(rt && rec[rt[1]] == null) rec[rt[1]] = rt[0];
+      priceCache[ref] = rec;
+      savePrices();
+      document.querySelectorAll('[data-pp="'+CSS.escape(ref)+'"]').forEach(el => { el.innerHTML = priceRows(ref); });
     }
   }catch(e){}
-  finally{ usdPending.delete(ref); }
+  finally{ pricePending.delete(ref); }
+}
+// listini mancanti, interrogando patek.com dalle altre uscite
+async function loadAllMarkets(ref, url, onUpdate){
+  await probeRoutes(url);
+  const map = (routeMap && routeMap.map) || {};
+  for(const cur of ['CHF','EUR','USD']){
+    const rec = priceCache[ref] || {ts: Date.now()};
+    if(rec[cur] != null) continue;
+    const i = map[cur];
+    if(i == null) continue;
+    try{
+      const p = await viaRoute(i, url);
+      if(p && p.cur === cur){
+        rec[cur] = p.v;
+        rec.ts = Date.now();
+        priceCache[ref] = rec;
+        savePrices();
+        if(onUpdate) onUpdate();
+      }
+    }catch(e){}
+  }
+}
+function fmt(cur, v){
+  const n = Math.round(v).toLocaleString('it-IT');
+  return cur === 'USD' ? '$ ' + n : (cur === 'EUR' ? '\u20AC ' + n : 'CHF ' + n);
+}
+// solo listini ufficiali: mai valori convertiti
+function priceRows(ref){
+  const rec = priceOf(ref) || {};
+  const rt = RETAIL[ref];
+  if(rt && rec[rt[1]] == null) rec[rt[1]] = rt[0];
+  let out = '';
+  let any = false;
+  for(const cur of ['CHF','EUR','USD']){
+    if(rec[cur] != null){ out += '<div class="price">' + fmt(cur, rec[cur]) + '</div>'; any = true; }
+  }
+  return any ? out : '<div class="price"><span style="opacity:.4">\u2026</span></div>';
+}
+function usdOf(ref){
+  const rec = priceOf(ref);
+  return rec && rec.USD != null ? rec.USD : null;
 }
 const priceObserver = ('IntersectionObserver' in window) ? new IntersectionObserver(entries => {
   for(const en of entries){
     if(en.isIntersecting){
       const el = en.target;
       priceObserver.unobserve(el);
-      loadUSD(el.dataset.ref, el.dataset.purl);
+      loadPrice(el.dataset.ref, el.dataset.purl);
     }
   }
 }, {rootMargin: '200px'}) : null;
@@ -384,8 +482,8 @@ function render(){
       const rf = card.querySelector('.ref');
       if(rf) rf.addEventListener('click', () => window.open(p.url, '_blank', 'noopener'));
       grid.appendChild(card);
-      const priceEl = card.querySelector('[data-usd]');
-      if(priceEl && priceObserver && usdOf(p.ref) == null){
+      const priceEl = card.querySelector('[data-pp]');
+      if(priceEl && priceObserver && !priceOf(p.ref)){
         priceEl.dataset.ref = p.ref;
         priceEl.dataset.purl = p.url;
         priceObserver.observe(priceEl);
@@ -453,7 +551,7 @@ function parseTech(raw){
 }
 async function fetchDesc(p){
   const c = descCache[p.ref];
-  if(c && Date.now() - c.ts < USD_TTL) return c.v;
+  if(c && Date.now() - c.ts < PRICE_TTL) return c.v;
   try{
     const r = await fetch(PROXY + encodeURIComponent(p.url), {cache:'no-store'});
     const t = await r.text();
@@ -485,11 +583,7 @@ function ensureSheet(){
 function openSheet(p){
   const ov = ensureSheet();
   const box = document.getElementById('sheetBox');
-  const live = usdOf(p.ref);
-  const r = RETAIL[p.ref];
-  let prices = '';
-  if(live != null) prices += '<div class="spr">$ ' + live.toLocaleString('it-IT') + ' <span>listino USA</span></div>';
-  if(r && r[1] === 'CHF') prices += '<div class="spr">CHF ' + r[0].toLocaleString('it-IT') + ' <span>listino</span></div>';
+  const prices = '<div class="sprices" id="sheetPrices">' + priceRows(p.ref) + '</div>';
   const cached = descCache[p.ref];
   const descInit = (cached && cached.v) ? descHTML(cached.v) : '<span style="color:#bbb">caricamento caratteristiche tecniche\u2026</span>';
   box.innerHTML =
@@ -512,6 +606,15 @@ function openSheet(p){
   if(bp) bp.addEventListener('click', () => window.print());
   const bc = document.getElementById('btnCloseSheet');
   if(bc) bc.addEventListener('click', closeSheet);
+  (async () => {
+    const refresh = () => {
+      const pe = document.getElementById('sheetPrices');
+      if(pe) pe.innerHTML = priceRows(p.ref);
+    };
+    if(!priceOf(p.ref)) { await loadPrice(p.ref, p.url); refresh(); }
+    await loadAllMarkets(p.ref, p.url, refresh);
+    refresh();
+  })();
   if(!(cached && cached.v)){
     fetchDesc(p).then(d => {
       const el = document.getElementById('sheetDesc');
@@ -523,12 +626,7 @@ function openSheet(p){
 }
 
 function retailLine(ref){
-  const live = usdOf(ref);
-  let h = '<div class="price" data-usd="'+esc(ref)+'">' +
-    (live != null ? '$' + live.toLocaleString('it-IT') : '<span style="opacity:.4">$ \u2026</span>') + '</div>';
-  const r = RETAIL[ref];
-  if(r && r[1] === 'CHF') h += '<div class="price est">CHF ' + r[0].toLocaleString('it-IT') + ' listino</div>';
-  return h;
+  return '<div class="prices" data-pp="'+esc(ref)+'">' + priceRows(ref) + '</div>';
 }
 function esc(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
