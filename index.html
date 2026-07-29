@@ -27,6 +27,11 @@ h1 img{width:26px;height:26px;border-radius:50%;background:#fff;padding:2px}
 h1 .mark{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:#b08d3f;color:#12182b;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.5px;margin-right:6px;vertical-align:middle}
 #lastSync{font-family:'DM Mono',monospace;font-size:10px;color:var(--dim)}
 #routeInfo{font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);margin:2px 0 6px;opacity:.75}
+#probeBox{display:none;font-family:'DM Mono',monospace;font-size:11px;color:var(--dim);background:rgba(255,255,255,.03);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin:6px 0 12px;max-height:300px;overflow:auto}
+#probeBox.on{display:block}
+#probeBox .hit{color:var(--gold2)}
+#probeBox .miss{opacity:.45}
+#probeBox h4{margin:0 0 8px;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold)}
 
 .toolbar{display:flex;gap:8px;margin-top:12px}
 .toolbar input{flex:1;background:var(--navy2);border:1px solid var(--line);border-radius:10px;color:var(--txt);font-family:'DM Mono',monospace;font-size:13px;padding:9px 12px;outline:none}
@@ -132,12 +137,14 @@ footer .src a{color:var(--gold);text-decoration:none}
   <div class="toolbar">
     <input id="search" type="search" placeholder="Cerca referenza, materiale…" autocomplete="off">
     <button class="btn gold" id="btnRefresh">Aggiorna</button>
+    <button class="btn" id="btnProbe" title="Verifica da quali mercati arrivano i listini">Sonda listini</button>
   </div>
   <div class="chips" id="chips"></div>
 </header>
 
 <div id="status"></div>
 <div id="routeInfo"></div>
+<div id="probeBox"></div>
 
 <div id="newsbar">
   <h3>Novità a catalogo</h3>
@@ -690,6 +697,47 @@ function retailLine(ref){
 }
 function esc(s){ return String(s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
 
+// ---------- sonda diagnostica: quale uscita + quale parametro danno quale valuta ----------
+const PROBE_VARIANTS = [
+  ['url nudo',        u => u],
+  ['?country=ch',     u => u + '?country=ch'],
+  ['?country=de',     u => u + '?country=de'],
+  ['?country=it',     u => u + '?country=it'],
+  ['/en-ch/',         u => u.replace('/en/', '/en-ch/')],
+  ['/en-de/',         u => u.replace('/en/', '/en-de/')]
+];
+async function runProbe(){
+  const box = document.getElementById('probeBox');
+  if(!box) return;
+  const sample = items.find(p => p.url) ;
+  if(!sample){ box.className = 'on'; box.textContent = 'Carica prima il catalogo.'; return; }
+  box.className = 'on';
+  box.innerHTML = '<h4>Sonda listini \u2014 ' + esc(sample.ref) + '</h4><div>in corso\u2026</div>';
+  const lines = [];
+  const draw = () => {
+    box.innerHTML = '<h4>Sonda listini \u2014 ' + esc(sample.ref) + '</h4>' + lines.join('');
+  };
+  for(let i = 0; i < ROUTES.length; i++){
+    for(const [label, build] of PROBE_VARIANTS){
+      let res = '\u2014';
+      let cls = 'miss';
+      try{
+        const u = build(sample.url);
+        const r = await fetch(ROUTES[i](u), {cache:'no-store'});
+        if(r.ok){
+          const p = parsePrice(await r.text());
+          if(p){ res = p.cur + ' ' + p.v.toLocaleString('it-IT'); cls = 'hit'; }
+          else res = 'nessun prezzo';
+        }else res = 'HTTP ' + r.status;
+      }catch(e){ res = 'non raggiungibile'; }
+      lines.push('<div class="' + cls + '">' + esc(ROUTE_NAMES[i] || ('uscita ' + i)) + ' \u00B7 ' + esc(label) + ' \u2192 ' + esc(res) + '</div>');
+      draw();
+    }
+  }
+  lines.push('<div style="margin-top:8px">Fine sonda. Le righe in oro sono quelle che restituiscono un listino.</div>');
+  draw();
+}
+
 // ---------- loader animato ----------
 let countTimer = null;
 function setPhase(t){ const e = document.getElementById('loadPhase'); if(e) e.textContent = t; }
@@ -774,6 +822,7 @@ async function refresh(force){
 }
 
 document.getElementById('btnRefresh').onclick = () => refresh(true);
+document.getElementById('btnProbe').onclick = runProbe;
 document.getElementById('search').addEventListener('input', render);
 
 showRoutes();
