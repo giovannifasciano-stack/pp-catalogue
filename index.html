@@ -358,6 +358,27 @@ function renderChips(cols, byCol){
   for(const c of cols) mk(c, c, byCol[c].length);
 }
 
+let descCache = (() => { try{ const r = localStorage.getItem('pp_desc_v1'); return r ? JSON.parse(r) : {}; }catch(e){ return {}; } })();
+function saveDesc(){ try{ localStorage.setItem('pp_desc_v1', JSON.stringify(descCache)); }catch(e){} }
+async function fetchDesc(p){
+  const c = descCache[p.ref];
+  if(c && Date.now() - c.ts < USD_TTL) return c.v;
+  try{
+    const r = await fetch(PROXY + encodeURIComponent(p.url), {cache:'no-store'});
+    const t = await r.text();
+    const doc = new DOMParser().parseFromString(t, 'text/html');
+    let d = '';
+    const og = doc.querySelector('meta[property="og:description"]') || doc.querySelector('meta[name="description"]');
+    if(og) d = (og.getAttribute('content') || '').trim();
+    if(d.length < 30){
+      const cand = doc.querySelector('.product-description, .description, [class*="description"] p, article p');
+      if(cand) d = cand.textContent.trim();
+    }
+    d = d.replace(/\s+/g, ' ').slice(0, 700);
+    if(d.length > 30){ descCache[p.ref] = {v: d, ts: Date.now()}; saveDesc(); return d; }
+  }catch(e){}
+  return null;
+}
 function openSheet(p){
   const w = window.open('', '_blank');           // sincrono per Safari
   if(!w) return;
@@ -367,6 +388,8 @@ function openSheet(p){
   if(live != null) prices += '<div class="pr">$ ' + live.toLocaleString('it-IT') + ' <span>listino USA</span></div>';
   if(r && r[1] === 'CHF') prices += '<div class="pr">CHF ' + r[0].toLocaleString('it-IT') + ' <span>listino</span></div>';
   const imgSrc = p.img || '';
+  const cached = descCache[p.ref];
+  const descInit = (cached && cached.v) ? esc(cached.v) : (p.mat ? esc(p.mat) : '<span style="color:#bbb">caricamento descrizione\u2026</span>');
   w.document.write('<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"><title>Patek Philippe \u2014 ' + esc(p.ref) + '</title>' +
     '<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=DM+Mono&display=swap" rel="stylesheet">' +
     '<style>' +
@@ -374,8 +397,9 @@ function openSheet(p){
     '.brand{font-size:13px;letter-spacing:4px;text-transform:uppercase;color:#b08d3f}' +
     'h1{font-weight:300;font-size:30px;margin:6px 0 2px}' +
     '.col{font-size:14px;color:#666;margin-bottom:24px}' +
-    '.photo{max-width:78%;max-height:52vh;object-fit:contain;margin:0 auto 26px;display:block}' +
-    '.mat{font-size:15px;line-height:1.6;max-width:480px;margin:0 auto 20px;color:#333}' +
+    '.photo{max-width:78%;max-height:48vh;object-fit:contain;margin:0 auto 26px;display:block}' +
+    '.mat{font-size:14px;line-height:1.65;max-width:520px;margin:0 auto 8px;color:#333}' +
+    '.desc{font-size:14px;line-height:1.65;max-width:520px;margin:0 auto 20px;color:#333;text-align:justify;text-align-last:center}' +
     '.pr{font-family:"DM Mono",monospace;font-size:17px;color:#b08d3f;margin:4px 0}' +
     '.pr span{font-size:11px;color:#999}' +
     '.src{margin-top:34px;font-family:"DM Mono",monospace;font-size:10px;color:#aaa}' +
@@ -386,13 +410,26 @@ function openSheet(p){
     '<div class="brand">Patek Philippe</div>' +
     '<h1>' + esc(p.ref) + '</h1>' +
     '<div class="col">' + esc(p.col || '') + '</div>' +
-    (imgSrc ? '<img class="photo" src="' + esc(imgSrc) + '" onload="setTimeout(function(){window.print()},350)">' : '') +
-    '<div class="mat">' + esc(p.mat || '') + '</div>' +
+    (imgSrc ? '<img class="photo" src="' + esc(imgSrc) + '">' : '') +
+    (p.mat ? '<div class="mat">' + esc(p.mat) + '</div>' : '') +
+    '<div class="desc" id="desc">' + descInit + '</div>' +
     prices +
     '<div class="src">patek.com \u00B7 PP Catalogue</div>' +
     '</body></html>');
   w.document.close();
-  if(!imgSrc) setTimeout(() => { try{ w.print(); }catch(e){} }, 400);
+
+  let printed = false;
+  const firePrint = () => { if(printed) return; printed = true; try{ w.focus(); w.print(); }catch(e){} };
+
+  (async () => {
+    const d = await fetchDesc(p);
+    try{
+      if(d){ const el = w.document.getElementById('desc'); if(el) el.textContent = d; }
+      else if(!p.mat && !(cached && cached.v)){ const el = w.document.getElementById('desc'); if(el) el.textContent = ''; }
+    }catch(e){}
+    setTimeout(firePrint, 500);
+  })();
+  setTimeout(firePrint, 6000);   // rete lenta: si stampa comunque
 }
 
 function retailLine(ref){
