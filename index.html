@@ -59,6 +59,29 @@ main{padding:8px 16px}
 .thumb img{width:100%;height:100%;object-fit:contain}
 .thumb .noimg{font-family:'DM Mono',monospace;font-size:10px;color:#999}
 .thumb{cursor:zoom-in}
+#sheetOverlay{display:none;position:fixed;inset:0;background:rgba(10,14,26,.55);z-index:100;overflow:auto;padding:24px 12px}
+#sheetOverlay.open{display:block}
+.sheet{background:#fff;color:#1a2238;max-width:640px;margin:0 auto;border-radius:16px;padding:38px 30px;text-align:center;position:relative}
+.sheet .brand{font-size:12px;letter-spacing:4px;text-transform:uppercase;color:#b08d3f}
+.sheet h1{font-weight:300;font-size:28px;margin:6px 0 2px;color:#1a2238}
+.sheet .scol{font-size:13px;color:#666;margin-bottom:20px}
+.sheet .photo{max-width:75%;max-height:44vh;object-fit:contain;margin:0 auto 22px;display:block}
+.sheet .smat{font-size:13px;line-height:1.6;max-width:480px;margin:0 auto 6px;color:#333}
+.sheet .sdesc{font-size:13px;line-height:1.65;max-width:480px;margin:0 auto 16px;color:#333}
+.sheet .spr{font-family:'DM Mono',monospace;font-size:16px;color:#b08d3f;margin:3px 0}
+.sheet .spr span{font-size:10px;color:#999}
+.sheet .ssrc{margin-top:26px;font-family:'DM Mono',monospace;font-size:9px;color:#aaa}
+.sheet-btns{display:flex;gap:10px;justify-content:center;margin-top:22px}
+.sheet-btns button{border:0;border-radius:9px;padding:11px 22px;font-family:Outfit,sans-serif;font-size:14px;cursor:pointer}
+.sheet-btns .bprint{background:#1a2238;color:#fff}
+.sheet-btns .bclose{background:#eee;color:#1a2238}
+@media print{
+  body.sheet-open > *:not(#sheetOverlay){display:none!important}
+  #sheetOverlay{position:static;background:#fff;padding:0;overflow:visible}
+  .sheet{border-radius:0;max-width:none;padding:10px}
+  .sheet .photo{max-height:50vh}
+  .sheet-btns{display:none!important}
+}
 .card .ref{cursor:pointer;text-decoration:underline;text-decoration-color:transparent;transition:text-decoration-color .15s}
 .card .ref:hover{text-decoration-color:currentColor}
 .meta{padding:9px 10px 11px}
@@ -379,57 +402,45 @@ async function fetchDesc(p){
   }catch(e){}
   return null;
 }
+function closeSheet(){
+  document.getElementById('sheetOverlay').classList.remove('open');
+  document.body.classList.remove('sheet-open');
+}
+document.addEventListener('keydown', e => { if(e.key === 'Escape') closeSheet(); });
 function openSheet(p){
-  const w = window.open('', '_blank');           // sincrono per Safari
-  if(!w) return;
+  const box = document.getElementById('sheetBox');
+  const ov = document.getElementById('sheetOverlay');
   const live = usdOf(p.ref);
   const r = RETAIL[p.ref];
   let prices = '';
-  if(live != null) prices += '<div class="pr">$ ' + live.toLocaleString('it-IT') + ' <span>listino USA</span></div>';
-  if(r && r[1] === 'CHF') prices += '<div class="pr">CHF ' + r[0].toLocaleString('it-IT') + ' <span>listino</span></div>';
-  const imgSrc = p.img || '';
+  if(live != null) prices += '<div class="spr">$ ' + live.toLocaleString('it-IT') + ' <span>listino USA</span></div>';
+  if(r && r[1] === 'CHF') prices += '<div class="spr">CHF ' + r[0].toLocaleString('it-IT') + ' <span>listino</span></div>';
   const cached = descCache[p.ref];
-  const descInit = (cached && cached.v) ? esc(cached.v) : (p.mat ? esc(p.mat) : '<span style="color:#bbb">caricamento descrizione\u2026</span>');
-  w.document.write('<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"><title>Patek Philippe \u2014 ' + esc(p.ref) + '</title>' +
-    '<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=DM+Mono&display=swap" rel="stylesheet">' +
-    '<style>' +
-    'body{font-family:Outfit,sans-serif;margin:0;padding:40px 30px;color:#1a2238;text-align:center;background:#fff}' +
-    '.brand{font-size:13px;letter-spacing:4px;text-transform:uppercase;color:#b08d3f}' +
-    'h1{font-weight:300;font-size:30px;margin:6px 0 2px}' +
-    '.col{font-size:14px;color:#666;margin-bottom:24px}' +
-    '.photo{max-width:78%;max-height:48vh;object-fit:contain;margin:0 auto 26px;display:block}' +
-    '.mat{font-size:14px;line-height:1.65;max-width:520px;margin:0 auto 8px;color:#333}' +
-    '.desc{font-size:14px;line-height:1.65;max-width:520px;margin:0 auto 20px;color:#333;text-align:justify;text-align-last:center}' +
-    '.pr{font-family:"DM Mono",monospace;font-size:17px;color:#b08d3f;margin:4px 0}' +
-    '.pr span{font-size:11px;color:#999}' +
-    '.src{margin-top:34px;font-family:"DM Mono",monospace;font-size:10px;color:#aaa}' +
-    '.btn{position:fixed;top:14px;right:14px;background:#1a2238;color:#fff;border:0;border-radius:8px;padding:10px 18px;font-family:Outfit;font-size:14px;cursor:pointer}' +
-    '@media print{.btn{display:none}body{padding:20px}}' +
-    '</style></head><body>' +
-    '<button class="btn" onclick="window.print()">Stampa</button>' +
+  const descInit = (cached && cached.v) ? esc(cached.v) : '<span style="color:#bbb">caricamento descrizione\u2026</span>';
+  box.innerHTML =
     '<div class="brand">Patek Philippe</div>' +
     '<h1>' + esc(p.ref) + '</h1>' +
-    '<div class="col">' + esc(p.col || '') + '</div>' +
-    (imgSrc ? '<img class="photo" src="' + esc(imgSrc) + '">' : '') +
-    (p.mat ? '<div class="mat">' + esc(p.mat) + '</div>' : '') +
-    '<div class="desc" id="desc">' + descInit + '</div>' +
+    '<div class="scol">' + esc(p.col || '') + '</div>' +
+    (p.img ? '<img class="photo" src="' + esc(p.img) + '">' : '') +
+    (p.mat ? '<div class="smat">' + esc(p.mat) + '</div>' : '') +
+    '<div class="sdesc" id="sheetDesc">' + descInit + '</div>' +
     prices +
-    '<div class="src">patek.com \u00B7 PP Catalogue</div>' +
-    '</body></html>');
-  w.document.close();
-
-  let printed = false;
-  const firePrint = () => { if(printed) return; printed = true; try{ w.focus(); w.print(); }catch(e){} };
-
-  (async () => {
-    const d = await fetchDesc(p);
-    try{
-      if(d){ const el = w.document.getElementById('desc'); if(el) el.textContent = d; }
-      else if(!p.mat && !(cached && cached.v)){ const el = w.document.getElementById('desc'); if(el) el.textContent = ''; }
-    }catch(e){}
-    setTimeout(firePrint, 500);
-  })();
-  setTimeout(firePrint, 6000);   // rete lenta: si stampa comunque
+    '<div class="ssrc">patek.com \u00B7 PP Catalogue</div>' +
+    '<div class="sheet-btns">' +
+      '<button class="bprint" onclick="window.print()">Stampa scheda</button>' +
+      '<button class="bclose" onclick="closeSheet()">Chiudi</button>' +
+    '</div>';
+  ov.classList.add('open');
+  document.body.classList.add('sheet-open');
+  ov.onclick = e => { if(e.target === ov) closeSheet(); };
+  if(!(cached && cached.v)){
+    fetchDesc(p).then(d => {
+      const el = document.getElementById('sheetDesc');
+      if(!el) return;
+      if(d) el.textContent = d;
+      else el.innerHTML = p.mat ? '' : '<span style="color:#bbb">descrizione non disponibile</span>';
+    });
+  }
 }
 
 function retailLine(ref){
