@@ -147,6 +147,9 @@ let items = [];
 let snapshot = null;
 let added = [];
 const PROXY = 'https://watch-proxy.owscan.workers.dev/?u=';
+function thumbURL(u){
+  return 'https://images.weserv.nl/?url=' + encodeURIComponent(u.replace(/^https?:\/\//,'')) + '&w=440&h=440&fit=contain&output=webp&q=72';
+}
 let activeCol = 'ALL';
 let usdCache = (() => { try{ const r = localStorage.getItem('pp_usd_v1'); return r ? JSON.parse(r) : {}; }catch(e){ return {}; } })();
 const USD_TTL = 7 * 24 * 60 * 60 * 1000;
@@ -316,7 +319,7 @@ function render(){
       card.target = '_blank'; card.rel = 'noopener';
       card.innerHTML =
         (added.includes(p.id) ? '<span class="badge">NEW</span>' : '') +
-        '<div class="thumb">' + (p.img ? '<img loading="lazy" src="'+esc(p.img)+'" alt="" onerror="this.parentNode.innerHTML=\'<span class=noimg>NO IMG</span>\'">' : '<span class="noimg">NO IMG</span>') + '</div>' +
+        '<div class="thumb">' + (p.img ? '<img loading="lazy" decoding="async" src="'+esc(thumbURL(p.img))+'" data-orig="'+esc(p.img)+'" alt="" onerror="if(this.dataset.orig){this.src=this.dataset.orig;delete this.dataset.orig}else{this.parentNode.innerHTML=\'<span class=noimg>NO IMG</span>\'}">' : '<span class="noimg">NO IMG</span>') + '</div>' +
         '<div class="meta"><div class="ref">'+esc(p.ref)+'</div>' +
         '<div class="mat">'+esc(p.mat || '')+'</div>' +
         retailLine(p.ref) +
