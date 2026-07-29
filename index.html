@@ -26,6 +26,7 @@ h1 img{width:26px;height:26px;border-radius:50%;background:#fff;padding:2px}
 .src.dis{margin-top:6px;max-width:520px;margin-left:auto;margin-right:auto;opacity:.6;line-height:1.5}
 h1 .mark{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:#b08d3f;color:#12182b;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.5px;margin-right:6px;vertical-align:middle}
 #lastSync{font-family:'DM Mono',monospace;font-size:10px;color:var(--dim)}
+#routeInfo{font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);margin:2px 0 6px;opacity:.75}
 
 .toolbar{display:flex;gap:8px;margin-top:12px}
 .toolbar input{flex:1;background:var(--navy2);border:1px solid var(--line);border-radius:10px;color:var(--txt);font-family:'DM Mono',monospace;font-size:13px;padding:9px 12px;outline:none}
@@ -136,6 +137,7 @@ footer .src a{color:var(--gold);text-decoration:none}
 </header>
 
 <div id="status"></div>
+<div id="routeInfo"></div>
 
 <div id="newsbar">
   <h3>Novità a catalogo</h3>
@@ -218,7 +220,7 @@ let activeCol = 'ALL';
 // ---------- listini ufficiali per mercato ----------
 // patek.com serve il prezzo nella valuta del paese da cui arriva la richiesta:
 // niente conversioni, si interroga il sito da tre uscite diverse.
-const PRICE_KEY = 'pp_price_v3', ROUTE_KEY = 'pp_routes_v1';
+const PRICE_KEY = 'pp_price_v4', ROUTE_KEY = 'pp_routes_v2';
 const PRICE_TTL = 7 * 24 * 60 * 60 * 1000;
 const ROUTE_TTL = 7 * 24 * 60 * 60 * 1000;
 let priceCache = (() => { try{ const r = localStorage.getItem(PRICE_KEY); return r ? JSON.parse(r) : {}; }catch(e){ return {}; } })();
@@ -231,14 +233,24 @@ const ROUTES = [
   u => PROXY + encodeURIComponent(u),
   u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
   u => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u),
-  u => 'https://corsproxy.io/?url=' + encodeURIComponent(u)
+  u => 'https://corsproxy.io/?url=' + encodeURIComponent(u),
+  u => 'https://thingproxy.freeboard.io/fetch/' + u,
+  u => 'https://api.cors.lol/?url=' + encodeURIComponent(u)
 ];
 function cleanNum(s){
   let x = s.replace(/[\u2019'\u00a0\s]/g, '');
   x = x.replace(/[.,](\d{2})$/, '');
   return +x.replace(/[^0-9]/g, '');
 }
-function parsePrice(t){
+function parsePrice(raw){
+  const t = String(raw)
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;|&#160;/gi, ' ')
+    .replace(/&euro;/gi, '\u20AC')
+    .replace(/&#8217;|&rsquo;/gi, '\u2019')
+    .replace(/\s+/g, ' ');
   const tries = [
     [/(?:CHF|SFr\.?)\s?([\d][\d\u2019'.,\s]{3,})/i, 'CHF'],
     [/([\d][\d\u2019'.,\s]{3,})\s?(?:CHF|SFr\.?)/i, 'CHF'],
@@ -265,6 +277,14 @@ async function viaRoute(i, url){
   return parsePrice(await r.text());
 }
 // sonda: scopre quale uscita restituisce quale valuta ufficiale
+const ROUTE_NAMES = ['tuo Worker', 'allorigins', 'codetabs', 'corsproxy', 'thingproxy', 'cors.lol'];
+function showRoutes(){
+  const el = document.getElementById('routeInfo');
+  if(!el || !routeMap) return;
+  const m = routeMap.map || {};
+  const parts = ['CHF','EUR','USD'].map(c => c + ': ' + (m[c] != null ? (ROUTE_NAMES[m[c]] || ('uscita ' + m[c])) : 'nessuna uscita'));
+  el.textContent = 'Listini \u2192 ' + parts.join(' \u00B7 ');
+}
 let probing = null;
 async function probeRoutes(sampleUrl){
   if(routeMap && Date.now() - routeMap.ts < ROUTE_TTL) return routeMap;
@@ -279,6 +299,7 @@ async function probeRoutes(sampleUrl){
   }
     routeMap = {map, ts: Date.now()};
     try{ localStorage.setItem(ROUTE_KEY, JSON.stringify(routeMap)); }catch(e){}
+    showRoutes();
     return routeMap;
   })();
   try{ return await probing; } finally { probing = null; }
@@ -755,6 +776,7 @@ async function refresh(force){
 document.getElementById('btnRefresh').onclick = () => refresh(true);
 document.getElementById('search').addEventListener('input', render);
 
+showRoutes();
 refresh();
 })();
 </script>
