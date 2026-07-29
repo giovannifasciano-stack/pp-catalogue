@@ -383,40 +383,44 @@ function renderChips(cols, byCol){
   for(const c of cols) mk(c, c, byCol[c].length);
 }
 
-let descCache = (() => { try{ const r = localStorage.getItem('pp_desc_v2'); return r ? JSON.parse(r) : {}; }catch(e){ return {}; } })();
-function saveDesc(){ try{ localStorage.setItem('pp_desc_v2', JSON.stringify(descCache)); }catch(e){} }
-// Estrae le sezioni di "Technical characteristics" dalla pagina prodotto Patek
-function parseTech(doc){
-  const heads = Array.from(doc.querySelectorAll('h1,h2,h3,h4'));
-  const techIdx = heads.findIndex(h => /technical\s+characteristics/i.test(h.textContent));
-  if(techIdx === -1) return null;
-  const tech = heads[techIdx];
-  const stopRe = /instructions\s+for\s+use|other\s+models|similar\s+watches|explore\s+more/i;
+let descCache = (() => { try{ const r = localStorage.getItem('pp_desc_v3'); return r ? JSON.parse(r) : {}; }catch(e){ return {}; } })();
+function saveDesc(){ try{ localStorage.setItem('pp_desc_v3', JSON.stringify(descCache)); }catch(e){} }
+// Estrae le sezioni di "Technical characteristics" lavorando sul testo grezzo
+const TECH_LABELS = ['dial','case','bezel','bracelet','strap','buckle','clasp','movement','caliber','calibre','additional information','chain'];
+function decodeEnt(s){
+  const ta = document.createElement('textarea');
+  ta.innerHTML = s;
+  return ta.value;
+}
+function parseTech(raw){
+  let h = raw.replace(/<script[\s\S]*?<\/script>/gi, '').replace(/<style[\s\S]*?<\/style>/gi, '');
+  const m = h.search(/technical\s*characteristics/i);
+  if(m === -1) return null;
+  let seg = h.slice(m);
+  const stop = seg.search(/instructions\s+for\s+use|other\s+models|similar\s+watches|explore\s+more|jewelry\s*&amp;\s*accessories/i);
+  if(stop > 40) seg = seg.slice(0, stop);
+  seg = seg.slice(0, 40000);
+  // tag di blocco -> a capo, il resto via
+  seg = seg.replace(/<\s*(br|\/p|\/div|\/li|\/h[1-6]|\/span|\/td|\/tr|\/button|\/section)[^>]*>/gi, '\n')
+           .replace(/<[^>]+>/g, ' ');
+  const lines = decodeEnt(seg).split('\n')
+    .map(x => x.replace(/\s+/g, ' ').trim())
+    .filter(x => x && !/^technical\s*characteristics$/i.test(x));
   const secs = [];
-  for(let i = techIdx + 1; i < heads.length; i++){
-    const h = heads[i];
-    const title = h.textContent.trim();
-    if(stopRe.test(title) || h.tagName === 'H1') break;
-    if(!title || title.length > 40) continue;
-    // testo: fratelli successivi fino al prossimo heading
-    let body = '';
-    let n = h.nextSibling;
-    let guard = 0;
-    while(n && guard++ < 40){
-      if(n.nodeType === 1 && /^H[1-6]$/.test(n.tagName)) break;
-      if(n.nodeType === 1 && n.querySelector && n.querySelector('h1,h2,h3,h4')) break;
-      const t = (n.textContent || '').trim();
-      if(t) body += (body ? ' ' : '') + t;
-      n = n.nextSibling;
+  let cur = null;
+  for(const ln of lines){
+    const key = ln.replace(/[:\u2013\u2014-]\s*$/, '').toLowerCase();
+    if(ln.length <= 26 && TECH_LABELS.includes(key)){
+      cur = {t: ln.replace(/[:\u2013\u2014-]\s*$/, ''), b: ''};
+      secs.push(cur);
+      continue;
     }
-    if(!body && h.parentElement){
-      body = h.parentElement.textContent.replace(title, '').trim();
+    if(cur && ln.length > 1 && !/^(front|back|download|play video|reduce motion)$/i.test(ln)){
+      if(cur.b.length < 600) cur.b += (cur.b ? ' ' : '') + ln;
     }
-    body = body.replace(/\s+/g, ' ').replace(/\b(Front|Back|Download)\b\s*$/g, '').trim();
-    if(body.length > 3) secs.push({t: title, b: body.slice(0, 600)});
-    if(secs.length >= 6) break;
   }
-  return secs.length ? secs : null;
+  const out = secs.filter(s => s.b.length > 3);
+  return out.length ? out.slice(0, 6) : null;
 }
 async function fetchDesc(p){
   const c = descCache[p.ref];
@@ -424,8 +428,7 @@ async function fetchDesc(p){
   try{
     const r = await fetch(PROXY + encodeURIComponent(p.url), {cache:'no-store'});
     const t = await r.text();
-    const doc = new DOMParser().parseFromString(t, 'text/html');
-    const secs = parseTech(doc);
+    const secs = parseTech(t);
     if(secs){ descCache[p.ref] = {v: secs, ts: Date.now()}; saveDesc(); return secs; }
   }catch(e){}
   return null;
