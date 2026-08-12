@@ -240,7 +240,7 @@ let activeCol = 'ALL';
 // ---------- listini ufficiali per mercato ----------
 // patek.com serve il prezzo nella valuta del paese da cui arriva la richiesta:
 // niente conversioni, si interroga il sito da tre uscite diverse.
-const PRICE_KEY = 'pp_price_v5', ROUTE_KEY = 'pp_routes_v2';
+const PRICE_KEY = 'pp_price_v6', ROUTE_KEY = 'pp_routes_v2';
 const PRICE_TTL = 7 * 24 * 60 * 60 * 1000;
 const ROUTE_TTL = 7 * 24 * 60 * 60 * 1000;
 let priceCache = (() => { try{ const r = localStorage.getItem(PRICE_KEY); return r ? JSON.parse(r) : {}; }catch(e){ return {}; } })();
@@ -254,11 +254,15 @@ const ROUTES = [
 ];
 // lettore con uscita a Francoforte: patek.com gli serve il listino in euro
 const EU_API = 'https://pp-eu-probe.vercel.app/api/price?u=';
+// L'uscita e' a Francoforte, quindi patek.com serve il prezzo con IVA tedesca (19%).
+// Patek fissa un netto europeo unico: si toglie l'IVA tedesca e si applica quella italiana (22%).
+const VAT_DE = 0.19, VAT_IT = 0.22;
+function deToIt(v){ return Math.round(v / (1 + VAT_DE) * (1 + VAT_IT)); }
 async function eurOf(url){
   const r = await fetch(EU_API + encodeURIComponent(url), {cache:'no-store'});
   if(!r.ok) throw new Error('eu ' + r.status);
   const d = await r.json();
-  if(d && d.ok && d.valuta === 'EUR' && d.prezzo) return d.prezzo;
+  if(d && d.ok && d.valuta === 'EUR' && d.prezzo) return deToIt(d.prezzo);
   return null;
 }
 function cleanNum(s){
