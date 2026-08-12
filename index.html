@@ -32,6 +32,12 @@ h1 img{width:26px;height:26px;border-radius:50%;background:#fff;padding:2px}
 .src.dis{font-size:7px;opacity:.4;letter-spacing:0;max-width:none;line-height:1.2}
 h1 .mark{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:#b08d3f;color:#12182b;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.5px;margin-right:6px;vertical-align:middle}
 #lastSync{font-family:'DM Mono',monospace;font-size:10px;color:var(--dim)}
+#chfBox{display:none;margin-top:10px;background:var(--navy2);border:1px solid var(--line);border-radius:12px;padding:12px}
+#chfBox.on{display:block}
+.chfTitle{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+#chfText{width:100%;height:78px;background:var(--navy);border:1px solid var(--line);border-radius:9px;color:var(--txt);font-family:'DM Mono',monospace;font-size:11px;padding:9px;outline:none;resize:vertical}
+.chfBtns{display:flex;gap:7px;margin-top:9px}
+.chfInfo{font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);margin-top:8px}
 @media (max-width:430px){h1{font-size:15px;letter-spacing:.04em}h1 .mark{width:22px;height:22px;font-size:9px;margin-right:2px}#lastSync{font-size:9px}}
 
 .toolbar{display:flex;gap:8px;margin-top:12px}
@@ -154,8 +160,19 @@ footer .src a{color:var(--gold);text-decoration:none}
   <div class="toolbar">
     <input id="search" type="search" placeholder="Cerca referenza, materiale…" autocomplete="off">
     <button class="btn gold" id="btnRefresh">Aggiorna</button>
+    <button class="btn" id="btnChf" title="Incolla il listino svizzero">CHF</button>
   </div>
   <div class="chips" id="chips"></div>
+  <div id="chfBox">
+    <div class="chfTitle">Listino svizzero</div>
+    <textarea id="chfText" placeholder='Incolla qui il listino raccolto da patek.com'></textarea>
+    <div class="chfBtns">
+      <button class="btn gold" id="chfSave">Importa</button>
+      <button class="btn" id="chfClear">Svuota</button>
+      <button class="btn" id="chfClose">Chiudi</button>
+    </div>
+    <div class="chfInfo" id="chfInfo"></div>
+  </div>
 </header>
 
 <div id="status"></div>
@@ -386,10 +403,31 @@ function fmt(cur, v){
   return cur === 'USD' ? '$ ' + n : (cur === 'EUR' ? '\u20AC ' + n : 'CHF ' + n);
 }
 // solo listini ufficiali: mai valori convertiti
+// listino svizzero importato dal browser (raccolto su patek.com dalla Svizzera)
+const CHF_KEY = 'pp_chf_v1';
+let chfList = (() => { try{ const r = localStorage.getItem(CHF_KEY); return r ? JSON.parse(r) : {}; }catch(e){ return {}; } })();
+function chfCount(){ return Object.keys(chfList).length; }
+function chfInfo(){
+  const el = document.getElementById('chfInfo');
+  if(el) el.textContent = chfCount() ? chfCount() + ' referenze con prezzo in franchi' : 'nessun listino importato';
+}
+function chfImport(txt){
+  let d;
+  try{ d = JSON.parse(txt); }catch(e){ return {ok:false, msg:'testo non valido: incolla il listino cosi\u2019 com\u2019e\u0300'}; }
+  if(!d || typeof d !== 'object' || Array.isArray(d)) return {ok:false, msg:'formato non riconosciuto'};
+  let n = 0;
+  for(const k of Object.keys(d)){
+    const v = +d[k];
+    if(v > 1000 && v < 100000000){ chfList[String(k).toUpperCase()] = Math.round(v); n++; }
+  }
+  try{ localStorage.setItem(CHF_KEY, JSON.stringify(chfList)); }catch(e){}
+  return {ok:true, msg: n + ' prezzi importati'};
+}
 function priceRows(ref){
-  const rec = priceOf(ref) || {};
+  const rec = Object.assign({}, priceOf(ref) || {});
   const rt = RETAIL[ref];
   if(rt && rec[rt[1]] == null) rec[rt[1]] = rt[0];
+  if(chfList[ref] != null) rec.CHF = chfList[ref];
   let out = '';
   let any = false;
   for(const cur of ['CHF','EUR','USD']){
@@ -833,6 +871,19 @@ async function refresh(force){
 }
 
 document.getElementById('btnRefresh').onclick = () => refresh(true);
+const chfBox = document.getElementById('chfBox');
+document.getElementById('btnChf').onclick = () => { chfBox.classList.toggle('on'); chfInfo(); };
+document.getElementById('chfClose').onclick = () => chfBox.classList.remove('on');
+document.getElementById('chfSave').onclick = () => {
+  const r = chfImport(document.getElementById('chfText').value.trim());
+  document.getElementById('chfInfo').textContent = r.msg;
+  if(r.ok){ document.getElementById('chfText').value = ''; render(); }
+};
+document.getElementById('chfClear').onclick = () => {
+  chfList = {};
+  try{ localStorage.removeItem(CHF_KEY); }catch(e){}
+  chfInfo(); render();
+};
 document.getElementById('search').addEventListener('input', render);
 
 refresh();
