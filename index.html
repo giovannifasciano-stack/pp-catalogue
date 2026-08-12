@@ -209,6 +209,7 @@ footer .src a{color:var(--gold);text-decoration:none}
 
 <footer>
   <div class="src">patek.com · listino EU gen 2026 (€) · novità W&amp;W in CHF</div>
+  <div class="src" style="opacity:.35;font-size:8px">versione 12.08 b</div>
   <div class="src dis">Strumento privato non ufficiale · marchi e contenuti Patek Philippe SA · nessuna affiliazione</div>
 </footer>
 
@@ -480,16 +481,27 @@ function chfImport(txt){
 // cambi del giorno, per capire quale mercato conviene davvero
 const FX_KEY = 'pp_fx_v2', FX_TTL = 12 * 60 * 60 * 1000;
 let fx = (() => { try{ const r = localStorage.getItem(FX_KEY); return r ? JSON.parse(r) : null; }catch(e){ return null; } })();
+// tre fonti: se la prima non risponde si passa alla successiva
+const FX_SOURCES = [
+  ['https://api.frankfurter.dev/v1/latest?base=CHF&symbols=EUR,USD', j => j && j.rates, j => j.date],
+  ['https://api.frankfurter.app/latest?from=CHF&to=EUR,USD', j => j && j.rates, j => j.date],
+  ['https://open.er-api.com/v6/latest/CHF', j => j && j.result === 'success' && j.rates, j => (j.time_last_update_utc || '').slice(5, 16)]
+];
 async function loadFX(){
   if(fx && Date.now() - fx.ts < FX_TTL) return fx;
-  try{
-    const r = await fetch('https://api.frankfurter.app/latest?from=CHF&to=EUR,USD');
-    const j = await r.json();
-    if(j && j.rates && j.rates.EUR && j.rates.USD){
-      fx = {EURCHF: 1 / j.rates.EUR, USDCHF: 1 / j.rates.USD, data: j.date, ts: Date.now()};
-      try{ localStorage.setItem(FX_KEY, JSON.stringify(fx)); }catch(e){}
-    }
-  }catch(e){}
+  for(const [url, pick, dateOf] of FX_SOURCES){
+    try{
+      const r = await fetch(url, {cache: 'no-store'});
+      if(!r.ok) continue;
+      const j = await r.json();
+      const rates = pick(j);
+      if(rates && rates.EUR && rates.USD){
+        fx = {EURCHF: 1 / rates.EUR, USDCHF: 1 / rates.USD, data: dateOf(j) || null, ts: Date.now()};
+        try{ localStorage.setItem(FX_KEY, JSON.stringify(fx)); }catch(e){}
+        return fx;
+      }
+    }catch(e){}
+  }
   return fx;
 }
 function inCHF(cur, v){
@@ -523,7 +535,11 @@ function bestBlock(ref){
   const nf = v => Math.round(v).toLocaleString('en-US').replace(/,/g, '\u2019');
   const riga = ['CHF','EUR','USD'].filter(c => b.tutti[c] != null)
     .map(c => c + ' ' + nf(b.tutti[c])).join(' \u00B7 ');
-  const dt = fx.data ? new Date(fx.data + 'T00:00:00').toLocaleDateString('it-IT', {day:'numeric', month:'long', year:'numeric'}) : '';
+  let dt = '';
+  if(fx.data){
+    const d = /^\d{4}-\d{2}-\d{2}$/.test(fx.data) ? new Date(fx.data + 'T00:00:00') : new Date(fx.data);
+    dt = isNaN(d) ? String(fx.data) : d.toLocaleDateString('it-IT', {day:'numeric', month:'long', year:'numeric'});
+  }
   const nomi = {CHF: 'Svizzera', EUR: 'Italia', USD: 'Stati Uniti'};
   return '<div class="fxnote">' +
     'In CHF al cambio' + (dt ? ' del ' + esc(dt) : ' del giorno') + ': ' + riga + '<br>' +
