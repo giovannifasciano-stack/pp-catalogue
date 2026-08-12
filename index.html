@@ -209,7 +209,7 @@ footer .src a{color:var(--gold);text-decoration:none}
 
 <footer>
   <div class="src">patek.com · listino EU gen 2026 (€) · novità W&amp;W in CHF</div>
-  <div class="src" style="opacity:.35;font-size:8px">versione 12.08 b</div>
+  <div class="src" style="opacity:.35;font-size:8px">versione 12.08 c</div>
   <div class="src dis">Strumento privato non ufficiale · marchi e contenuti Patek Philippe SA · nessuna affiliazione</div>
 </footer>
 
@@ -533,16 +533,18 @@ function bestBlock(ref){
   const b = bestMarket(ref);
   if(!b || !fx) return '';
   const nf = v => Math.round(v).toLocaleString('en-US').replace(/,/g, '\u2019');
+  const MERCATO = {CHF: 'Svizzera', EUR: 'Italia', USD: 'Stati Uniti'};
   const riga = ['CHF','EUR','USD'].filter(c => b.tutti[c] != null)
-    .map(c => c + ' ' + nf(b.tutti[c])).join(' \u00B7 ');
+    .map(c => MERCATO[c] + ' ' + nf(b.tutti[c])).join(' \u00B7 ');
   let dt = '';
   if(fx.data){
     const d = /^\d{4}-\d{2}-\d{2}$/.test(fx.data) ? new Date(fx.data + 'T00:00:00') : new Date(fx.data);
     dt = isNaN(d) ? String(fx.data) : d.toLocaleDateString('it-IT', {day:'numeric', month:'long', year:'numeric'});
   }
-  const nomi = {CHF: 'Svizzera', EUR: 'Italia', USD: 'Stati Uniti'};
+  const nomi = MERCATO;
   return '<div class="fxnote">' +
-    'In CHF al cambio' + (dt ? ' del ' + esc(dt) : ' del giorno') + ': ' + riga + '<br>' +
+    'Costo effettivo in franchi' + (dt ? ', cambio del ' + esc(dt) : ', cambio del giorno') + '<br>' +
+    riga + '<br>' +
     '1 USD = ' + fx.USDCHF.toFixed(4) + ' CHF \u00B7 1 EUR = ' + fx.EURCHF.toFixed(4) + ' CHF<br>' +
     '<span class="save">' + nomi[b.cur] + ' pi\u00F9 conveniente di CHF ' + nf(b.scarto) +
     ' sul secondo mercato</span></div>';
