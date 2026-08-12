@@ -96,6 +96,12 @@ body.sheet-open{overflow:hidden}
 .sheet .sprices .price{display:flex;justify-content:space-between;align-items:baseline;gap:14px;font-family:'DM Mono',monospace;margin:4px 0;padding-bottom:3px;border-bottom:1px solid #eee}
 .sheet .sprices .pc{font-size:12px;letter-spacing:.08em;color:#777}
 .sheet .sprices .pv{font-size:16px;color:#b08d3f}
+.sheet .sprices .price.best{background:#eef7f1;margin:0 -10px;padding:9px 10px;border-radius:5px;border-bottom:none}
+.sheet .sprices .price.best .pv{color:#3f8a5c;font-weight:700}
+.sheet .sprices .price.best .pc{color:#3f8a5c}
+.sheet .sprices .tag{display:inline-block;margin-left:7px;background:#3f8a5c;color:#fff;font-size:7.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:3px;vertical-align:middle}
+.sheet .fxnote{font-family:'DM Mono',monospace;font-size:8.5px;color:#a2a2a2;line-height:1.6;margin-top:14px;padding-top:10px;border-top:1px solid #f0ece6;text-align:left}
+.sheet .fxnote .save{color:#3f8a5c}
 .sheet .sprices .price.wait{color:#bbb;font-size:13px}
 .sheet .spr span{font-size:10px;color:#999}
 .sheet .ssrc{margin-top:26px;font-family:'DM Mono',monospace;font-size:9px;color:#aaa}
@@ -119,6 +125,8 @@ body.sheet-open{overflow:hidden}
   .sheet .tc{margin-bottom:5px}
   .sheet .tct{font-size:8px;letter-spacing:1.4px}
   .sheet .sprices .price{font-size:13px;margin:1px 0}
+  .sheet .sprices .price.best{background:#eef7f1!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .sheet .fxnote{font-size:7.5px;margin-top:8px;padding-top:6px}
   .sheet .ssrc{margin-top:10px;font-size:8px}
   .sheet-btns{display:none!important}
 }
@@ -469,17 +477,81 @@ function chfImport(txt){
   try{ localStorage.setItem(CHF_KEY, JSON.stringify(chfList)); }catch(e){}
   return {ok:true, msg: n + ' prezzi importati'};
 }
-function priceRows(ref){
+// cambi del giorno, per capire quale mercato conviene davvero
+const FX_KEY = 'pp_fx_v2', FX_TTL = 12 * 60 * 60 * 1000;
+let fx = (() => { try{ const r = localStorage.getItem(FX_KEY); return r ? JSON.parse(r) : null; }catch(e){ return null; } })();
+async function loadFX(){
+  if(fx && Date.now() - fx.ts < FX_TTL) return fx;
+  try{
+    const r = await fetch('https://api.frankfurter.app/latest?from=CHF&to=EUR,USD');
+    const j = await r.json();
+    if(j && j.rates && j.rates.EUR && j.rates.USD){
+      fx = {EURCHF: 1 / j.rates.EUR, USDCHF: 1 / j.rates.USD, data: j.date, ts: Date.now()};
+      try{ localStorage.setItem(FX_KEY, JSON.stringify(fx)); }catch(e){}
+    }
+  }catch(e){}
+  return fx;
+}
+function inCHF(cur, v){
+  if(cur === 'CHF') return v;
+  if(!fx) return null;
+  return cur === 'EUR' ? v * fx.EURCHF : v * fx.USDCHF;
+}
+// valori dei tre listini, convertiti in franchi
+function marketsCHF(ref){
+  const rec = priceSet(ref);
+  const out = {};
+  for(const cur of ['CHF','EUR','USD']){
+    if(rec[cur] != null){
+      const c = inCHF(cur, rec[cur]);
+      if(c != null) out[cur] = c;
+    }
+  }
+  return out;
+}
+function bestMarket(ref){
+  const m = marketsCHF(ref);
+  const keys = Object.keys(m);
+  if(keys.length < 2) return null;
+  keys.sort((a, b) => m[a] - m[b]);
+  return {cur: keys[0], chf: m[keys[0]], secondo: keys[1], scarto: m[keys[1]] - m[keys[0]], tutti: m};
+}
+// blocco riepilogo sotto i listini, in stile scheda
+function bestBlock(ref){
+  const b = bestMarket(ref);
+  if(!b || !fx) return '';
+  const nf = v => Math.round(v).toLocaleString('en-US').replace(/,/g, '\u2019');
+  const riga = ['CHF','EUR','USD'].filter(c => b.tutti[c] != null)
+    .map(c => c + ' ' + nf(b.tutti[c])).join(' \u00B7 ');
+  const dt = fx.data ? new Date(fx.data + 'T00:00:00').toLocaleDateString('it-IT', {day:'numeric', month:'long', year:'numeric'}) : '';
+  const nomi = {CHF: 'Svizzera', EUR: 'Italia', USD: 'Stati Uniti'};
+  return '<div class="fxnote">' +
+    'In CHF al cambio' + (dt ? ' del ' + esc(dt) : ' del giorno') + ': ' + riga + '<br>' +
+    '1 USD = ' + fx.USDCHF.toFixed(4) + ' CHF \u00B7 1 EUR = ' + fx.EURCHF.toFixed(4) + ' CHF<br>' +
+    '<span class="save">' + nomi[b.cur] + ' pi\u00F9 conveniente di CHF ' + nf(b.scarto) +
+    ' sul secondo mercato</span></div>';
+}
+// insieme dei tre listini per una referenza
+function priceSet(ref){
   const rec = Object.assign({}, priceOf(ref) || {});
   const rt = RETAIL[ref];
   if(rt && rec[rt[1]] == null) rec[rt[1]] = rt[0];
   const c = chfOf(ref);
   if(c != null) rec.CHF = c;
+  return rec;
+}
+function priceRows(ref){
+  const rec = priceSet(ref);
+  const evidenzia = arguments.length > 1 && arguments[1];
+  const b = evidenzia ? bestMarket(ref) : null;
   let out = '';
   let any = false;
   for(const cur of ['CHF','EUR','USD']){
     if(rec[cur] != null){
-      out += '<div class="price"><span class="pc">' + FLAG[cur] + ' ' + cur + '</span>' +
+      const best = b && b.cur === cur;
+      out += '<div class="price' + (best ? ' best' : '') + '">' +
+             '<span class="pc">' + FLAG[cur] + ' ' + cur +
+             (best ? '<span class="tag">Migliore</span>' : '') + '</span>' +
              '<span class="pv">' + fmtAmount(cur, rec[cur]) + '</span></div>';
       any = true;
     }
@@ -792,7 +864,7 @@ function ensureSheet(){
 function openSheet(p){
   const ov = ensureSheet();
   const box = document.getElementById('sheetBox');
-  const prices = '<div class="sprices" id="sheetPrices">' + priceRows(p.ref) + '</div>';
+  const prices = '<div class="sprices" id="sheetPrices">' + priceRows(p.ref, true) + bestBlock(p.ref) + '</div>';
   const cached = descCache[p.ref];
   const descInit = (cached && cached.v) ? descHTML(cached.v) : '<span style="color:#bbb">caricamento caratteristiche tecniche\u2026</span>';
   box.innerHTML =
@@ -818,8 +890,10 @@ function openSheet(p){
   (async () => {
     const refresh = () => {
       const pe = document.getElementById('sheetPrices');
-      if(pe) pe.innerHTML = priceRows(p.ref);
+      if(pe) pe.innerHTML = priceRows(p.ref, true) + bestBlock(p.ref);
     };
+    await loadFX();
+    refresh();
     if(!priceOf(p.ref)) await loadPrice(p.ref, p.url);
     refresh();
   })();
