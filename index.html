@@ -404,12 +404,47 @@ function fmt(cur, v){
 }
 // solo listini ufficiali: mai valori convertiti
 // listino svizzero importato dal browser (raccolto su patek.com dalla Svizzera)
-const CHF_KEY = 'pp_chf_v1';
+const CHF_KEY = 'pp_chf_v1', CHF_REPO_KEY = 'pp_chf_repo_v1';
 let chfList = (() => { try{ const r = localStorage.getItem(CHF_KEY); return r ? JSON.parse(r) : {}; }catch(e){ return {}; } })();
+// listino ufficiale svizzero pubblicato nel repository: unica fonte per tutti i dispositivi
+let chfRepo = (() => { try{ const r = localStorage.getItem(CHF_REPO_KEY); return r ? JSON.parse(r) : {}; }catch(e){ return {}; } })();
+let chfRepoInfo = null;
+async function loadChfRepo(){
+  try{
+    const r = await fetch('chf.json?v=' + Date.now(), {cache:'no-store'});
+    if(!r.ok) return;
+    const d = await r.json();
+    const p = (d && d.prezzi) ? d.prezzi : d;
+    if(p && typeof p === 'object' && !Array.isArray(p)){
+      const clean = {};
+      for(const k of Object.keys(p)){
+        const v = +p[k];
+        if(v > 1000 && v < 100000000) clean[String(k).toUpperCase()] = Math.round(v);
+      }
+      if(Object.keys(clean).length){
+        chfRepo = clean;
+        chfRepoInfo = (d && d.aggiornato) ? d.aggiornato : null;
+        try{ localStorage.setItem(CHF_REPO_KEY, JSON.stringify(chfRepo)); }catch(e){}
+        render();
+        chfInfo();
+      }
+    }
+  }catch(e){}
+}
+function chfOf(ref){
+  if(chfRepo[ref] != null) return chfRepo[ref];
+  if(chfList[ref] != null) return chfList[ref];
+  return null;
+}
 function chfCount(){ return Object.keys(chfList).length; }
 function chfInfo(){
   const el = document.getElementById('chfInfo');
-  if(el) el.textContent = chfCount() ? chfCount() + ' referenze con prezzo in franchi' : 'nessun listino importato';
+  if(!el) return;
+  const nr = Object.keys(chfRepo).length, nl = chfCount();
+  const parts = [];
+  if(nr) parts.push(nr + ' dal listino pubblicato' + (chfRepoInfo ? ' (' + chfRepoInfo + ')' : ''));
+  if(nl) parts.push(nl + ' importate su questo dispositivo');
+  el.textContent = parts.length ? parts.join(' \u00B7 ') : 'nessun listino in franchi';
 }
 function chfImport(txt){
   let d;
@@ -427,7 +462,8 @@ function priceRows(ref){
   const rec = Object.assign({}, priceOf(ref) || {});
   const rt = RETAIL[ref];
   if(rt && rec[rt[1]] == null) rec[rt[1]] = rt[0];
-  if(chfList[ref] != null) rec.CHF = chfList[ref];
+  const c = chfOf(ref);
+  if(c != null) rec.CHF = c;
   let out = '';
   let any = false;
   for(const cur of ['CHF','EUR','USD']){
@@ -886,6 +922,7 @@ document.getElementById('chfClear').onclick = () => {
 };
 document.getElementById('search').addEventListener('input', render);
 
+loadChfRepo();
 refresh();
 })();
 </script>
