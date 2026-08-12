@@ -240,7 +240,7 @@ let activeCol = 'ALL';
 // ---------- listini ufficiali per mercato ----------
 // patek.com serve il prezzo nella valuta del paese da cui arriva la richiesta:
 // niente conversioni, si interroga il sito da tre uscite diverse.
-const PRICE_KEY = 'pp_price_v4', ROUTE_KEY = 'pp_routes_v2';
+const PRICE_KEY = 'pp_price_v5', ROUTE_KEY = 'pp_routes_v2';
 const PRICE_TTL = 7 * 24 * 60 * 60 * 1000;
 const ROUTE_TTL = 7 * 24 * 60 * 60 * 1000;
 let priceCache = (() => { try{ const r = localStorage.getItem(PRICE_KEY); return r ? JSON.parse(r) : {}; }catch(e){ return {}; } })();
@@ -321,9 +321,12 @@ async function probeRoutes(sampleUrl){
 }
 // prezzo dalla tua uscita: e' quello che vedresti tu aprendo patek.com
 async function loadPrice(ref, url){
-  if(priceOf(ref) || pricePending.has(ref)) return;
+  if(pricePending.has(ref)) return;
+  const cached = priceOf(ref);
+  if(cached && cached.EUR != null) return;      // gia' completo
   pricePending.add(ref);
   try{
+    if(cached) throw new Error('salta usd');     // dollaro gia' noto: vai diritto all'euro
     const p = await viaRoute(0, url);
     if(p){
       const rec = priceCache[ref] && Date.now() - priceCache[ref].ts < PRICE_TTL ? priceCache[ref] : {ts: Date.now()};
