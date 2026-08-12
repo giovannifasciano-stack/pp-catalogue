@@ -252,6 +252,15 @@ function savePrices(){ try{ localStorage.setItem(PRICE_KEY, JSON.stringify(price
 const ROUTES = [
   u => PROXY + encodeURIComponent(u)
 ];
+// lettore con uscita a Francoforte: patek.com gli serve il listino in euro
+const EU_API = 'https://pp-eu-probe.vercel.app/api/price?u=';
+async function eurOf(url){
+  const r = await fetch(EU_API + encodeURIComponent(url), {cache:'no-store'});
+  if(!r.ok) throw new Error('eu ' + r.status);
+  const d = await r.json();
+  if(d && d.ok && d.valuta === 'EUR' && d.prezzo) return d.prezzo;
+  return null;
+}
 function cleanNum(s){
   let x = s.replace(/[\u2019'\u00a0\s]/g, '');
   x = x.replace(/[.,](\d{2})$/, '');
@@ -324,7 +333,21 @@ async function loadPrice(ref, url){
       if(rt && rec[rt[1]] == null) rec[rt[1]] = rt[0];
       priceCache[ref] = rec;
       savePrices();
-      document.querySelectorAll('[data-pp="'+CSS.escape(ref)+'"]').forEach(el => { el.innerHTML = priceRows(ref); });
+      refreshPrices(ref);
+    }
+  }catch(e){}
+  // listino europeo ufficiale
+  try{
+    const rec = priceCache[ref] || {ts: Date.now()};
+    if(rec.EUR == null){
+      const e = await eurOf(url);
+      if(e){
+        rec.EUR = e;
+        rec.ts = Date.now();
+        priceCache[ref] = rec;
+        savePrices();
+        refreshPrices(ref);
+      }
     }
   }catch(e){}
   finally{ pricePending.delete(ref); }
