@@ -92,7 +92,10 @@ body.sheet-open{overflow:hidden}
 .sheet .tc{margin:0 0 9px}
 .sheet .tct{display:block;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#b08d3f;margin-bottom:2px}
 .sheet .spr{font-family:'DM Mono',monospace;font-size:16px;color:#b08d3f;margin:3px 0}
-.sheet .sprices .price{font-family:'DM Mono',monospace;font-size:16px;color:#b08d3f;margin:3px 0}
+.sheet .sprices{max-width:340px;margin:0 auto}
+.sheet .sprices .price{display:flex;justify-content:space-between;align-items:baseline;gap:14px;font-family:'DM Mono',monospace;margin:4px 0;padding-bottom:3px;border-bottom:1px solid #eee}
+.sheet .sprices .pc{font-size:12px;letter-spacing:.08em;color:#777}
+.sheet .sprices .pv{font-size:16px;color:#b08d3f}
 .sheet .sprices .price.wait{color:#bbb;font-size:13px}
 .sheet .spr span{font-size:10px;color:#999}
 .sheet .ssrc{margin-top:26px;font-family:'DM Mono',monospace;font-size:9px;color:#aaa}
@@ -128,7 +131,10 @@ body.sheet-open{overflow:hidden}
 .meta .price{font-family:'DM Mono',monospace;font-size:14px;color:var(--gold2);margin-top:6px}
 .meta .price.est{font-size:10.5px;color:var(--dim);margin-top:2px}
 .meta .prices{margin-top:6px}
-.meta .prices .price{font-family:'DM Mono',monospace;font-size:12.5px;color:var(--gold2);margin:1px 0;letter-spacing:.02em}
+.meta .prices{border-top:1px solid var(--line);padding-top:7px}
+.meta .prices .price{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-family:'DM Mono',monospace;margin:2px 0}
+.meta .prices .pc{font-size:11px;letter-spacing:.06em;color:var(--dim);white-space:nowrap}
+.meta .prices .pv{font-size:13px;color:var(--gold2);text-align:right;letter-spacing:.01em}
 .meta .prices .price.wait{color:var(--dim);opacity:.45}
 .badge{position:absolute;top:8px;left:8px;font-family:'DM Mono',monospace;font-size:9.5px;font-weight:500;letter-spacing:.08em;padding:3px 8px;border-radius:6px;z-index:2;background:var(--green);color:#0a1428}
 
@@ -398,10 +404,15 @@ async function loadAllMarkets(ref, url, onUpdate){
     }catch(e){}
   }
 }
-function fmt(cur, v){
-  const n = Math.round(v).toLocaleString('it-IT');
-  return cur === 'USD' ? '$ ' + n : (cur === 'EUR' ? '\u20AC ' + n : 'CHF ' + n);
+// ogni mercato con la propria convenzione, come sul sito ufficiale
+const FLAG = {CHF: '\uD83C\uDDE8\uD83C\uDDED', EUR: '\uD83C\uDDEA\uD83C\uDDFA', USD: '\uD83C\uDDFA\uD83C\uDDF8'};
+function fmtAmount(cur, v){
+  const n = Math.round(v);
+  if(cur === 'CHF') return n.toLocaleString('en-US').replace(/,/g, '\u2019') + '.00';
+  if(cur === 'EUR') return n.toLocaleString('it-IT') + ',00';
+  return n.toLocaleString('en-US') + '.00';
 }
+function fmt(cur, v){ return cur + ' ' + fmtAmount(cur, v); }
 // solo listini ufficiali: mai valori convertiti
 // listino svizzero importato dal browser (raccolto su patek.com dalla Svizzera)
 const CHF_KEY = 'pp_chf_v1', CHF_REPO_KEY = 'pp_chf_repo_v1';
@@ -467,7 +478,11 @@ function priceRows(ref){
   let out = '';
   let any = false;
   for(const cur of ['CHF','EUR','USD']){
-    if(rec[cur] != null){ out += '<div class="price">' + fmt(cur, rec[cur]) + '</div>'; any = true; }
+    if(rec[cur] != null){
+      out += '<div class="price"><span class="pc">' + FLAG[cur] + ' ' + cur + '</span>' +
+             '<span class="pv">' + fmtAmount(cur, rec[cur]) + '</span></div>';
+      any = true;
+    }
   }
   return any ? out : '<div class="price"><span style="opacity:.4">\u2026</span></div>';
 }
