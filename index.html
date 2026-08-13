@@ -77,8 +77,6 @@ main{padding:8px 16px}
 .thumb .noimg{font-family:'DM Mono',monospace;font-size:10px;color:#999}
 .thumb{cursor:zoom-in}
 
-  @page{margin:10mm}
-  html,body{background:#fff!important;-webkit-print-color-adjust:economy;print-color-adjust:economy}
 .card .ref{cursor:pointer;text-decoration:underline;text-decoration-color:transparent;transition:text-decoration-color .15s}
 .card .ref:hover{text-decoration-color:currentColor}
 .meta{padding:9px 10px 11px}
@@ -99,7 +97,8 @@ main{padding:8px 16px}
 #loader{display:none;flex-direction:column;align-items:center;gap:16px;padding:70px 20px}
 #loader.on{display:flex}
 .spin{width:46px;height:46px;border-radius:50%;background:conic-gradient(var(--gold),rgba(176,141,63,.05) 70%);animation:sp 1.05s linear infinite;position:relative}
-.spin::after{content:'';position:absolute;inset:5px;border-radius:50%;background:var(--bg)}to{transform:rotate(360deg)}.spin{animation-duration:3s}
+.spin::after{content:'';position:absolute;inset:5px;border-radius:50%;background:var(--navy)}
+@keyframes sp{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 #loadPhase{font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);letter-spacing:.28em;text-transform:uppercase}
 #loadCount{display:flex;gap:26px;justify-content:center}
 #loadCount div{text-align:center}
@@ -239,7 +238,7 @@ body.sheet-open{overflow:hidden}
 
 <footer>
   <div class="src">patek.com · listino EU gen 2026 (€) · novità W&amp;W in CHF</div>
-  <div class="src" style="opacity:.35;font-size:8px">versione 13.08 b</div>
+  <div class="src" style="opacity:.35;font-size:8px">versione 13.08 c</div>
   <div class="src dis">Strumento privato non ufficiale · marchi e contenuti Patek Philippe SA · nessuna affiliazione</div>
 </footer>
 
