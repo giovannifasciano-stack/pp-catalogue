@@ -76,77 +76,9 @@ main{padding:8px 16px}
 .thumb img{width:100%;height:100%;object-fit:contain}
 .thumb .noimg{font-family:'DM Mono',monospace;font-size:10px;color:#999}
 .thumb{cursor:zoom-in}
-#sheetOverlay{display:none;position:fixed;inset:0;background:rgba(20,13,8,.65);z-index:100;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:16px 10px calc(24px + env(safe-area-inset-bottom))}
-#sheetOverlay.open{display:block}
-body.sheet-open{overflow:hidden}
-@supports (-webkit-touch-callout:none){body.sheet-open #sheetOverlay{position:fixed;height:100dvh}}
-.sheet{background:#fff;color:#1a2238;max-width:640px;margin:0 auto;border-radius:16px;padding:26px 20px 0;text-align:center;position:relative}
-.sheet .brand{margin-bottom:2px}
-.sheet .pplogo{display:block;height:34px;width:auto;margin:0 auto 6px;object-fit:contain}
-.sheet .ppword{font-family:Georgia,'Times New Roman',serif;font-size:15px;letter-spacing:5px;text-transform:uppercase;color:#1a2238}
-.sheet h1{font-weight:300;font-size:28px;margin:6px 0 2px;color:#1a2238}
-.sheet .scol{font-size:13px;color:#666;margin-bottom:20px}
-.sheet .photo{max-width:75%;max-height:44vh;object-fit:contain;margin:0 auto 22px;display:block}
-.sheet .smat{font-size:13px;line-height:1.6;max-width:480px;margin:0 auto 6px;color:#333}
-.sheet .sdesc{font-size:12.5px;line-height:1.6;max-width:500px;margin:0 auto 16px;color:#333;text-align:left}
-.sheet .tc{margin:0 0 9px}
-.sheet .tct{display:block;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:#b08d3f;margin-bottom:2px}
-.sheet .spr{font-family:'DM Mono',monospace;font-size:16px;color:#b08d3f;margin:3px 0}
-.sheet .sprices{max-width:340px;margin:0 auto}
-.sheet .sprices .price{display:flex;justify-content:space-between;align-items:baseline;gap:14px;font-family:'DM Mono',monospace;margin:4px 0;padding-bottom:3px;border-bottom:1px solid #eee}
-.sheet .sprices .pc{font-size:12px;letter-spacing:.08em;color:#777}
-.sheet .sprices .pv{font-size:16px;color:#b08d3f}
-.sheet .sprices .price.best{background:#eef7f1;margin:0 -10px;padding:9px 10px;border-radius:5px;border-bottom:none}
-.sheet .sprices .price.best .pv{color:#3f8a5c;font-weight:700}
-.sheet .sprices .price.best .pc{color:#3f8a5c}
-.sheet .sprices .tag{display:inline-block;margin-left:7px;background:#3f8a5c;color:#fff;font-size:7.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:3px;vertical-align:middle}
-.sheet .fxnote{font-family:'DM Mono',monospace;font-size:8.5px;color:#a2a2a2;line-height:1.6;margin-top:14px;padding-top:10px;border-top:1px solid #f0ece6;text-align:left}
-.sheet .fxnote .save{color:#3f8a5c}
-.sheet .exp{margin-top:20px;text-align:left}
-.sheet .exph{font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:.2em;text-transform:uppercase;color:#b08d3f;padding-bottom:6px;border-bottom:1px solid #e6e0d6;margin-bottom:8px}
-.sheet .exptab{width:100%;border-collapse:collapse;font-family:'DM Mono',monospace;font-size:9.5px}
-.sheet .exptab th{font-weight:400;font-size:7.5px;letter-spacing:.12em;text-transform:uppercase;color:#a2a2a2;padding:0 5px 5px;text-align:left}
-.sheet .exptab td{padding:6px 5px;border-top:1px solid #f0ece6;color:#3a3a3a;white-space:nowrap}
-.sheet .exptab .r{text-align:right}
-.sheet .exptab .nch{color:#b08d3f}
-.sheet .exptab tr.bestrow td{background:#f6f2e8}
-.sheet .exptab .badge{background:#6b5a34;color:#fff;font-size:7px;letter-spacing:.1em;text-transform:uppercase;padding:2px 5px;border-radius:3px}
-.sheet .bestbox{margin-top:12px;background:#f6f2e8;border-left:3px solid #b08d3f;padding:10px 12px}
-.sheet .bestbox .bl{font-family:'DM Mono',monospace;font-size:7.5px;letter-spacing:.16em;text-transform:uppercase;color:#b08d3f;margin-bottom:4px}
-.sheet .bestbox .bb{font-size:13px;color:#1a2238}
-.sheet .bestbox .eq{font-family:'DM Mono',monospace;font-size:9.5px;color:#8a8a8a}
-.sheet .expnote{font-family:'DM Mono',monospace;font-size:7.5px;line-height:1.65;color:#a2a2a2;margin-top:12px;padding-top:9px;border-top:1px solid #f0ece6;text-align:left}
-.sheet .sprices .price.wait{color:#bbb;font-size:13px}
-.sheet .spr span{font-size:10px;color:#999}
-.sheet .ssrc{margin-top:26px;font-family:'DM Mono',monospace;font-size:9px;color:#aaa}
-.sheet-btns{position:sticky;bottom:0;display:flex;gap:10px;justify-content:center;padding:12px 0 16px;margin-top:14px;background:linear-gradient(rgba(255,255,255,0),#fff 28%)}
-.sheet-btns button{border:0;border-radius:9px;padding:11px 22px;font-family:Outfit,sans-serif;font-size:14px;cursor:pointer}
-.sheet-btns .bprint{background:#1a2238;color:#fff}
-.sheet-btns .bclose{background:#eee;color:#1a2238}
-@media print{
+
   @page{margin:10mm}
   html,body{background:#fff!important;-webkit-print-color-adjust:economy;print-color-adjust:economy}
-  body.sheet-open > *:not(#sheetOverlay){display:none!important}
-  #sheetOverlay{position:static!important;inset:auto;background:#fff!important;padding:0!important;margin:0;overflow:visible;height:auto;width:auto;backdrop-filter:none}
-  .sheet{background:#fff!important;border-radius:0;max-width:none!important;width:auto!important;margin:0;padding:0;box-shadow:none;page-break-inside:avoid}
-  .sheet .pplogo{height:26px;margin-bottom:4px}
-  .sheet .ppword{font-size:12px;letter-spacing:4px}
-  .sheet h1{font-size:22px;margin:4px 0 1px}
-  .sheet .scol{font-size:11px;margin-bottom:10px}
-  .sheet .photo{max-width:52%;max-height:78mm;margin:0 auto 10px}
-  .sheet .smat{font-size:10.5px;margin-bottom:4px}
-  .sheet .sdesc{font-size:10px;line-height:1.35;max-width:none;margin-bottom:8px}
-  .sheet .tc{margin-bottom:5px}
-  .sheet .tct{font-size:8px;letter-spacing:1.4px}
-  .sheet .sprices .price{font-size:13px;margin:1px 0}
-  .sheet .sprices .price.best{background:#eef7f1!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .sheet .exptab tr.bestrow td,.sheet .bestbox{background:#f6f2e8!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .sheet .exptab{font-size:8.5px}
-  .sheet .exp{margin-top:12px}
-  .sheet .fxnote{font-size:7.5px;margin-top:8px;padding-top:6px}
-  .sheet .ssrc{margin-top:10px;font-size:8px}
-  .sheet-btns{display:none!important}
-}
 .card .ref{cursor:pointer;text-decoration:underline;text-decoration-color:transparent;transition:text-decoration-color .15s}
 .card .ref:hover{text-decoration-color:currentColor}
 .meta{padding:9px 10px 11px}
@@ -167,9 +99,7 @@ body.sheet-open{overflow:hidden}
 #loader{display:none;flex-direction:column;align-items:center;gap:16px;padding:70px 20px}
 #loader.on{display:flex}
 .spin{width:46px;height:46px;border-radius:50%;background:conic-gradient(var(--gold),rgba(176,141,63,.05) 70%);animation:sp 1.05s linear infinite;position:relative}
-.spin::after{content:'';position:absolute;inset:5px;border-radius:50%;background:var(--bg)}
-@keyframes sp{to{transform:rotate(360deg)}}
-@media (prefers-reduced-motion: reduce){.spin{animation-duration:3s}}
+.spin::after{content:'';position:absolute;inset:5px;border-radius:50%;background:var(--bg)}to{transform:rotate(360deg)}.spin{animation-duration:3s}
 #loadPhase{font-family:'DM Mono',monospace;font-size:11px;color:var(--gold);letter-spacing:.28em;text-transform:uppercase}
 #loadCount{display:flex;gap:26px;justify-content:center}
 #loadCount div{text-align:center}
@@ -179,6 +109,89 @@ body.sheet-open{overflow:hidden}
 footer{position:fixed;bottom:0;left:0;right:0;padding:4px 12px calc(4px + env(safe-area-inset-bottom));background:rgba(34,23,16,.94);backdrop-filter:blur(8px);border-top:1px solid var(--line);display:flex;flex-direction:column;align-items:center;gap:1px}
 footer .src{font-family:'DM Mono',monospace;font-size:8.5px;color:var(--dim);text-align:center;line-height:1.25}
 footer .src a{color:var(--gold);text-decoration:none}
+/* ---------- scheda / stampa ---------- */
+#sheetOverlay{display:none;position:fixed;inset:0;background:rgba(20,13,8,.72);z-index:100;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:0 0 env(safe-area-inset-bottom)}
+#sheetOverlay.open{display:block}
+body.sheet-open{overflow:hidden}
+.sheet{max-width:880px;margin:0 auto;background:#fff;color:#2a2a2a}
+.sheet-btns{position:sticky;top:0;z-index:2;display:flex;justify-content:flex-end;gap:9px;padding:11px 14px;background:#efece7;border-bottom:1px solid #e0dad0}
+.sheet-btns button{font-family:'Outfit',sans-serif;font-size:12px;font-weight:500;letter-spacing:.04em;padding:9px 17px;border-radius:5px;border:1px solid #cfc7ba;background:#fff;color:#3a3a3a;cursor:pointer}
+.sheet-btns .bprint{background:#6b5a34;border-color:#6b5a34;color:#fff}
+.sbody{padding:28px 34px 26px}
+
+.sheet .shd{text-align:center;border-bottom:1px solid #e6e0d6;padding-bottom:13px}
+.sheet .shd .pp{font-family:'Cormorant Garamond',serif;font-size:23px;letter-spacing:.16em;text-transform:uppercase;color:#1a1a1a;font-weight:500}
+.sheet .shd .gv{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:13px;color:#8a8a8a;margin-top:1px}
+.sheet .photo{display:block;margin:16px auto 8px;max-width:190px;max-height:210px;object-fit:contain}
+.sheet .rc{text-align:center;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:#b08d3f}
+.sheet h1{text-align:center;font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:500;color:#1a1a1a;margin:2px 0 1px;letter-spacing:.01em}
+.sheet .rs{text-align:center;font-size:11.5px;color:#8a8a8a;margin-bottom:20px}
+
+.sheet .grid2{display:grid;grid-template-columns:1fr 1fr;gap:32px}
+.sheet .sec{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:#b08d3f;border-bottom:1px solid #e6e0d6;padding-bottom:6px;margin-bottom:9px}
+.sheet .kv{display:flex;justify-content:space-between;gap:12px;font-size:11.5px;padding:5px 0;border-bottom:1px solid #f4f1ec}
+.sheet .kv .k{color:#8a8a8a}
+.sheet .kv .v{color:#2a2a2a;text-align:right}
+
+.sheet .sprices .price{display:flex;justify-content:space-between;align-items:center;font-family:'DM Mono',monospace;font-size:11.5px;padding:7px 0;border-bottom:1px solid #f4f1ec;margin:0}
+.sheet .sprices .pc{color:#777;letter-spacing:.06em}
+.sheet .sprices .pv{color:#b08d3f}
+.sheet .sprices .price.best{background:#f6f2e8;margin:0 -8px;padding:7px 8px;border-bottom:none;border-radius:4px}
+.sheet .sprices .price.best .pv{color:#6b5a34;font-weight:500}
+.sheet .sprices .price.best .pc{color:#6b5a34}
+.sheet .sprices .tag,.sheet .exptab .badge{display:inline-block;margin-left:6px;background:#6b5a34;color:#fff;font-size:6.5px;letter-spacing:.1em;text-transform:uppercase;padding:2px 5px;border-radius:3px;vertical-align:middle}
+.sheet .fxnote{font-family:'DM Mono',monospace;font-size:8px;color:#b3aca1;margin-top:8px;line-height:1.65;text-align:left;border:none;padding:0}
+.sheet .fxnote .save{color:#6b5a34}
+
+.sheet .tech{margin-top:24px}
+.sheet .tcols{column-count:2;column-gap:32px}
+.sheet .tc{break-inside:avoid;-webkit-column-break-inside:avoid;margin-bottom:11px}
+.sheet .tct{font-family:'DM Mono',monospace;font-size:7.5px;letter-spacing:.2em;text-transform:uppercase;color:#b08d3f;margin-bottom:3px}
+.sheet .tcb{font-size:10.5px;line-height:1.55;color:#3a3a3a}
+
+.sheet .exp{margin-top:22px;text-align:left}
+.sheet .exph{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:#b08d3f;border-bottom:1px solid #e6e0d6;padding-bottom:6px;margin-bottom:8px}
+.sheet .exptab{width:100%;border-collapse:collapse;font-family:'DM Mono',monospace;font-size:9.5px}
+.sheet .exptab th{font-weight:400;font-size:7px;letter-spacing:.13em;text-transform:uppercase;color:#a2a2a2;padding:0 6px 6px;text-align:left}
+.sheet .exptab td{padding:7px 6px;border-top:1px solid #f0ece6;color:#3a3a3a;white-space:nowrap}
+.sheet .exptab .r{text-align:right}
+.sheet .exptab .nch{color:#b08d3f}
+.sheet .exptab tr.bestrow td{background:#f6f2e8}
+.sheet .bestbox{margin-top:13px;background:#f6f2e8;border-left:3px solid #b08d3f;padding:11px 13px}
+.sheet .bestbox .bl{font-family:'DM Mono',monospace;font-size:7px;letter-spacing:.16em;text-transform:uppercase;color:#b08d3f;margin-bottom:4px}
+.sheet .bestbox .bb{font-size:13.5px;color:#1a1a1a}
+.sheet .bestbox .eq{font-family:'DM Mono',monospace;font-size:9px;color:#8a8a8a}
+.sheet .expnote{font-family:'DM Mono',monospace;font-size:7px;line-height:1.7;color:#b3aca1;margin-top:13px;padding-top:9px;border-top:1px solid #f0ece6;text-align:left}
+.sheet .sfoot{margin-top:16px;padding-top:9px;border-top:1px solid #e6e0d6;font-family:'DM Mono',monospace;font-size:7px;color:#b3aca1;line-height:1.7}
+.sheet .sfoot b{color:#6a6a6a;font-weight:500}
+
+@media (max-width:640px){
+  .sbody{padding:20px 16px}
+  .sheet .grid2{grid-template-columns:1fr;gap:20px}
+  .sheet .tcols{column-count:1}
+  .sheet .exptab{font-size:8.5px}
+  .sheet .exptab td,.sheet .exptab th{padding-left:3px;padding-right:3px}
+  .sheet .exp{overflow-x:auto}
+}
+
+@media print{
+  @page{margin:10mm}
+  html,body{background:#fff!important}
+  body.sheet-open > *:not(#sheetOverlay){display:none!important}
+  #sheetOverlay{position:static!important;inset:auto;background:#fff!important;padding:0!important;overflow:visible;height:auto}
+  .sheet{max-width:none!important;margin:0;box-shadow:none}
+  .sheet-btns{display:none!important}
+  .sbody{padding:0}
+  .sheet .photo{max-width:150px;max-height:150px;margin:10px auto 6px}
+  .sheet h1{font-size:23px}
+  .sheet .grid2{gap:22px}
+  .sheet .tech{margin-top:16px}
+  .sheet .tcb{font-size:9px;line-height:1.45}
+  .sheet .exp{margin-top:16px}
+  .sheet .exptab{font-size:8.5px}
+  .sheet .exptab tr.bestrow td,.sheet .bestbox,.sheet .sprices .price.best{background:#f6f2e8!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .sheet .exptab .badge,.sheet .sprices .tag{background:#6b5a34!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
 </style>
 </head>
 <body>
@@ -226,7 +239,7 @@ footer .src a{color:var(--gold);text-decoration:none}
 
 <footer>
   <div class="src">patek.com · listino EU gen 2026 (€) · novità W&amp;W in CHF</div>
-  <div class="src" style="opacity:.35;font-size:8px">versione 13.08 a</div>
+  <div class="src" style="opacity:.35;font-size:8px">versione 13.08 b</div>
   <div class="src dis">Strumento privato non ufficiale · marchi e contenuti Patek Philippe SA · nessuna affiliazione</div>
 </footer>
 
@@ -940,7 +953,20 @@ async function fetchDesc(p){
   return null;
 }
 function descHTML(secs){
-  return secs.map(s => '<div class="tc"><span class="tct">' + esc(s.t) + '</span>' + esc(s.b) + '</div>').join('');
+  return secs.map(s => '<div class="tc"><div class="tct">' + esc(s.t) + '</div><div class="tcb">' + esc(s.b) + '</div></div>').join('');
+}
+// dati sintetici per la colonna Specifiche, ricavati dal testo tecnico
+function specHTML(p, secs){
+  const txt = (secs || []).map(s => s.b).join(' ');
+  const riga = (k, v) => v ? '<div class="kv"><span class="k">' + esc(k) + '</span><span class="v">' + esc(v) + '</span></div>' : '';
+  const cerca = re => { const m = txt.match(re); return m ? m[1].trim() : ''; };
+  const diam = cerca(/Diameter[^:]{0,26}:\s*([\d.,]+\s?mm)/i);
+  const spess = cerca(/Thickness:\s*([\d.,]+\s?mm)/i);
+  const acqua = cerca(/Water-resistant to\s*([\d]+\s?m)/i);
+  const mov = cerca(/\b((?:CH\s|CHR\s)?[0-9]{2}-[0-9]{3}[A-Z0-9\s\/]{0,12}?)\s(?:Self-winding|Manual)/i);
+  return riga('Collezione', p.col) + riga('Referenza', p.ref) + riga('Materiale cassa', p.mat) +
+         riga('Diametro', diam) + riga('Spessore', spess) + riga('Movimento', mov) +
+         riga('Impermeabilit\u00E0', acqua) + riga('Disponibilit\u00E0', 'Collezione attuale');
 }
 window.closeSheet = closeSheet;
 function closeSheet(){
@@ -962,23 +988,44 @@ function ensureSheet(){
 function openSheet(p, conExport){
   const ov = ensureSheet();
   const box = document.getElementById('sheetBox');
-  const prices = '<div class="sprices" id="sheetPrices">' + priceRows(p.ref, true) + bestBlock(p.ref) +
-                 (conExport ? exportBlock(p.ref) : '') + '</div>';
   const cached = descCache[p.ref];
-  const descInit = (cached && cached.v) ? descHTML(cached.v) : '<span style="color:#bbb">caricamento caratteristiche tecniche\u2026</span>';
-  box.innerHTML =
-    '<div class="brand" id="sheetHead">' + logoIMG() + '<div class="ppword">Patek Philippe</div></div>' +
+  const secs = (cached && cached.v) ? cached.v : null;
+  const oggi = new Date().toLocaleDateString('it-IT', {day:'numeric', month:'long', year:'numeric'});
+
+  const testa =
+    '<div class="shd"><div class="pp">Patek Philippe</div><div class="gv">Gen\u00E8ve</div></div>' +
+    (p.img ? '<img class="photo" src="' + esc(bigURL(p.img)) + '" onerror="imgFail(this)">' : '') +
+    '<div class="rc">' + esc(p.col || '') + '</div>' +
     '<h1>' + esc(p.ref) + '</h1>' +
-    '<div class="scol">' + esc(p.col || '') + '</div>' +
-    (p.img ? '<img class="photo" src="' + esc(bigURL(p.img)) + '">' : '') +
-    (p.mat ? '<div class="smat">' + esc(p.mat) + '</div>' : '') +
-    '<div class="sdesc" id="sheetDesc">' + descInit + '</div>' +
-    prices +
-    '<div class="ssrc">patek.com \u00B7 PP Catalogue</div>' +
-    '<div class="sheet-btns">' +
-      '<button class="bprint" id="btnPrintSheet" type="button">Stampa scheda</button>' +
-      '<button class="bclose" id="btnCloseSheet" type="button">Chiudi</button>' +
+    '<div class="rs">' + esc(p.mat || '') + '</div>';
+
+  const colonne =
+    '<div class="grid2">' +
+      '<div><div class="sec">Specifiche</div><div id="sheetSpec">' + specHTML(p, secs) + '</div></div>' +
+      '<div><div class="sec">Prezzi ufficiali al pubblico</div>' +
+        '<div class="sprices" id="sheetPrices">' + priceRows(p.ref, true) + bestBlock(p.ref) + '</div></div>' +
     '</div>';
+
+  const tecnica =
+    '<div class="tech"><div class="sec">Caratteristiche tecniche</div>' +
+    '<div class="tcols" id="sheetDesc">' +
+      (secs ? descHTML(secs) : '<span style="color:#bbb">caricamento\u2026</span>') +
+    '</div></div>';
+
+  const exp = '<div id="sheetExp">' + (conExport ? exportBlock(p.ref) : '') + '</div>';
+
+  const piede =
+    '<div class="sfoot"><b>' + esc(p.ref) + '</b> \u00B7 scheda generata il ' + esc(oggi) + ' \u00B7 patek.com<br>' +
+    'Listini ufficiali Patek Philippe per Svizzera, Italia e Stati Uniti, rilevati da patek.com. ' +
+    'Soggetti a variazione e alle imposte locali. Documento non ufficiale \u2014 Patek Philippe\u00AE \u00E8 un marchio di Patek Philippe SA. Nessuna affiliazione.</div>';
+
+  box.innerHTML =
+    '<div class="sheet-btns">' +
+      '<button class="bprint" id="btnPrintSheet" type="button">Stampa / Salva PDF</button>' +
+      '<button class="bclose" id="btnCloseSheet" type="button">Chiudi</button>' +
+    '</div>' +
+    '<div class="sbody">' + testa + colonne + tecnica + exp + piede + '</div>';
+
   ov.classList.add('open');
   document.body.classList.add('sheet-open');
   ov.onclick = e => { if(e.target === ov) closeSheet(); };
@@ -986,22 +1033,26 @@ function openSheet(p, conExport){
   if(bp) bp.addEventListener('click', () => window.print());
   const bc = document.getElementById('btnCloseSheet');
   if(bc) bc.addEventListener('click', closeSheet);
+
   (async () => {
-    const refresh = () => {
+    const rinfresca = () => {
       const pe = document.getElementById('sheetPrices');
-      if(pe) pe.innerHTML = priceRows(p.ref, true) + bestBlock(p.ref) + (conExport ? exportBlock(p.ref) : '');
+      if(pe) pe.innerHTML = priceRows(p.ref, true) + bestBlock(p.ref);
+      const ex = document.getElementById('sheetExp');
+      if(ex && conExport) ex.innerHTML = exportBlock(p.ref);
     };
     await loadFX();
-    refresh();
+    rinfresca();
     if(!priceOf(p.ref)) await loadPrice(p.ref, p.url);
-    refresh();
+    rinfresca();
   })();
-  if(!(cached && cached.v)){
+
+  if(!secs){
     fetchDesc(p).then(d => {
       const el = document.getElementById('sheetDesc');
-      if(!el) return;
-      if(d) el.innerHTML = descHTML(d);
-      else el.innerHTML = '<span style="color:#bbb">caratteristiche non disponibili</span>';
+      const sp = document.getElementById('sheetSpec');
+      if(el) el.innerHTML = d ? descHTML(d) : '<span style="color:#bbb">caratteristiche non disponibili</span>';
+      if(sp && d) sp.innerHTML = specHTML(p, d);
     });
   }
 }
