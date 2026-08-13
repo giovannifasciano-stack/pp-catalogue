@@ -7,7 +7,7 @@
 # ============================================================
 set -e
 
-CHIAVE=$(head -c 18 /dev/urandom | base64 | tr -d '/+=' | cut -c1-22)
+CHIAVE="${PP_CHIAVE:-$(head -c 18 /dev/urandom | base64 | tr -d '/+=' | cut -c1-22)}"
 
 echo ">>> Aggiornamento pacchetti"
 export DEBIAN_FRONTEND=noninteractive
