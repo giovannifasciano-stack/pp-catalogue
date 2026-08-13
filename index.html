@@ -102,6 +102,20 @@ body.sheet-open{overflow:hidden}
 .sheet .sprices .tag{display:inline-block;margin-left:7px;background:#3f8a5c;color:#fff;font-size:7.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:2px 6px;border-radius:3px;vertical-align:middle}
 .sheet .fxnote{font-family:'DM Mono',monospace;font-size:8.5px;color:#a2a2a2;line-height:1.6;margin-top:14px;padding-top:10px;border-top:1px solid #f0ece6;text-align:left}
 .sheet .fxnote .save{color:#3f8a5c}
+.sheet .exp{margin-top:20px;text-align:left}
+.sheet .exph{font-family:'DM Mono',monospace;font-size:8.5px;letter-spacing:.2em;text-transform:uppercase;color:#b08d3f;padding-bottom:6px;border-bottom:1px solid #e6e0d6;margin-bottom:8px}
+.sheet .exptab{width:100%;border-collapse:collapse;font-family:'DM Mono',monospace;font-size:9.5px}
+.sheet .exptab th{font-weight:400;font-size:7.5px;letter-spacing:.12em;text-transform:uppercase;color:#a2a2a2;padding:0 5px 5px;text-align:left}
+.sheet .exptab td{padding:6px 5px;border-top:1px solid #f0ece6;color:#3a3a3a;white-space:nowrap}
+.sheet .exptab .r{text-align:right}
+.sheet .exptab .nch{color:#b08d3f}
+.sheet .exptab tr.bestrow td{background:#f6f2e8}
+.sheet .exptab .badge{background:#6b5a34;color:#fff;font-size:7px;letter-spacing:.1em;text-transform:uppercase;padding:2px 5px;border-radius:3px}
+.sheet .bestbox{margin-top:12px;background:#f6f2e8;border-left:3px solid #b08d3f;padding:10px 12px}
+.sheet .bestbox .bl{font-family:'DM Mono',monospace;font-size:7.5px;letter-spacing:.16em;text-transform:uppercase;color:#b08d3f;margin-bottom:4px}
+.sheet .bestbox .bb{font-size:13px;color:#1a2238}
+.sheet .bestbox .eq{font-family:'DM Mono',monospace;font-size:9.5px;color:#8a8a8a}
+.sheet .expnote{font-family:'DM Mono',monospace;font-size:7.5px;line-height:1.65;color:#a2a2a2;margin-top:12px;padding-top:9px;border-top:1px solid #f0ece6;text-align:left}
 .sheet .sprices .price.wait{color:#bbb;font-size:13px}
 .sheet .spr span{font-size:10px;color:#999}
 .sheet .ssrc{margin-top:26px;font-family:'DM Mono',monospace;font-size:9px;color:#aaa}
@@ -126,6 +140,9 @@ body.sheet-open{overflow:hidden}
   .sheet .tct{font-size:8px;letter-spacing:1.4px}
   .sheet .sprices .price{font-size:13px;margin:1px 0}
   .sheet .sprices .price.best{background:#eef7f1!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .sheet .exptab tr.bestrow td,.sheet .bestbox{background:#f6f2e8!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .sheet .exptab{font-size:8.5px}
+  .sheet .exp{margin-top:12px}
   .sheet .fxnote{font-size:7.5px;margin-top:8px;padding-top:6px}
   .sheet .ssrc{margin-top:10px;font-size:8px}
   .sheet-btns{display:none!important}
@@ -209,7 +226,7 @@ footer .src a{color:var(--gold);text-decoration:none}
 
 <footer>
   <div class="src">patek.com · listino EU gen 2026 (€) · novità W&amp;W in CHF</div>
-  <div class="src" style="opacity:.35;font-size:8px">versione 12.08 c</div>
+  <div class="src" style="opacity:.35;font-size:8px">versione 13.08 a</div>
   <div class="src dis">Strumento privato non ufficiale · marchi e contenuti Patek Philippe SA · nessuna affiliazione</div>
 </footer>
 
@@ -529,6 +546,64 @@ function bestMarket(ref){
   return {cur: keys[0], chf: m[keys[0]], secondo: keys[1], scarto: m[keys[1]] - m[keys[0]], tutti: m};
 }
 // blocco riepilogo sotto i listini, in stile scheda
+// ---------- analisi export, netto IVA ----------
+// CH 8.1%, IT 22%; il listino USA e' gia' al netto (la sales tax si aggiunge alla cassa e non si recupera)
+const VAT = {CHF: 0.081, EUR: 0.22, USD: 0};
+const MERCATI = {CHF: ['\uD83C\uDDE8\uD83C\uDDED', 'Svizzera'], EUR: ['\uD83C\uDDEA\uD83C\uDDFA', 'Italia (UE)'], USD: ['\uD83C\uDDFA\uD83C\uDDF8', 'Stati Uniti']};
+function n2(cur, v){
+  const o = {minimumFractionDigits: 2, maximumFractionDigits: 2};
+  if(cur === 'CHF') return v.toLocaleString('en-US', o).replace(/,/g, '\u2019');
+  if(cur === 'EUR') return v.toLocaleString('it-IT', o);
+  return v.toLocaleString('en-US', o);
+}
+function exportRows(ref){
+  const rec = priceSet(ref);
+  if(!fx) return null;
+  const rows = [];
+  for(const cur of ['CHF','EUR','USD']){
+    if(rec[cur] == null) continue;
+    const net = rec[cur] / (1 + VAT[cur]);
+    const netCHF = inCHF(cur, net);
+    if(netCHF == null) continue;
+    rows.push({cur, listino: rec[cur], vat: VAT[cur], net, netCHF,
+               netEUR: netCHF / fx.EURCHF, netUSD: netCHF / fx.USDCHF});
+  }
+  if(rows.length < 2) return null;
+  let best = rows[0];
+  for(const r of rows) if(r.netCHF < best.netCHF) best = r;
+  for(const r of rows) r.delta = r === best ? 0 : (r.netCHF / best.netCHF - 1) * 100;
+  return {rows, best};
+}
+function exportBlock(ref){
+  const d = exportRows(ref);
+  if(!d) return '';
+  const {rows, best} = d;
+  let t = '<div class="exp"><div class="exph">Analisi export \u00B7 netto IVA</div>' +
+    '<table class="exptab"><thead><tr>' +
+    '<th>Mercato</th><th class="r">Listino</th><th class="r">IVA</th>' +
+    '<th class="r">Net CHF</th><th class="r">Net EUR</th><th class="r">Net USD</th><th class="r">\u0394</th>' +
+    '</tr></thead><tbody>';
+  for(const r of rows){
+    const isBest = r === best;
+    t += '<tr' + (isBest ? ' class="bestrow"' : '') + '>' +
+      '<td>' + MERCATI[r.cur][0] + ' ' + MERCATI[r.cur][1] + '</td>' +
+      '<td class="r">' + r.cur + ' ' + n2(r.cur, r.listino) + '</td>' +
+      '<td class="r">' + (r.vat ? (r.vat * 100).toFixed(1).replace('.0', '') + '%' : '\u2014') + '</td>' +
+      '<td class="r nch">' + n2('CHF', r.netCHF) + '</td>' +
+      '<td class="r">' + n2('EUR', r.netEUR) + '</td>' +
+      '<td class="r">' + n2('USD', r.netUSD) + '</td>' +
+      '<td class="r">' + (isBest ? '<span class="badge">Migliore</span>' : '+' + r.delta.toFixed(1) + '%') + '</td>' +
+      '</tr>';
+  }
+  t += '</tbody></table>';
+  t += '<div class="bestbox"><div class="bl">Mercato migliore</div>' +
+    '<div class="bb">' + MERCATI[best.cur][0] + ' <b>' + MERCATI[best.cur][1] + ' \u00B7 ' +
+    best.cur + ' ' + n2(best.cur, best.net) + ' netto</b> ' +
+    '<span class="eq">(CHF ' + n2('CHF', best.netCHF) + ') (USD ' + n2('USD', best.netUSD) + ')</span></div></div>';
+  t += '<div class="expnote">I prezzi netti escludono l\u2019IVA (Svizzera 8.1%, Italia 22%) e sono indicativi di un acquisto in esenzione/export; il rimborso reale \u00E8 di norma inferiore per via delle commissioni d\u2019agenzia. I listini USA sono al netto della sales tax locale, aggiunta alla cassa e non recuperabile. Cambi: 1 CHF = ' +
+    (1 / fx.EURCHF).toFixed(4) + ' EUR = ' + (1 / fx.USDCHF).toFixed(4) + ' USD. Dazi, sdoganamento e condizioni di garanzia non sono inclusi in questo confronto.</div></div>';
+  return t;
+}
 function bestBlock(ref){
   const b = bestMarket(ref);
   if(!b || !fx) return '';
@@ -754,6 +829,11 @@ function render(){
       if(rf) rf.addEventListener('click', () => window.open(p.url, '_blank', 'noopener'));
       grid.appendChild(card);
       const priceEl = card.querySelector('[data-pp]');
+      if(priceEl){
+        priceEl.style.cursor = 'pointer';
+        priceEl.title = 'Analisi export \u00B7 netto IVA';
+        priceEl.addEventListener('click', ev => { ev.stopPropagation(); openSheet(p, true); });
+      }
       const recNow = priceOf(p.ref) || {};
       const missing = ['CHF','EUR','USD'].some(c => recNow[c] == null);
       if(priceEl && priceObserver && missing){
@@ -879,10 +959,11 @@ function ensureSheet(){
   }
   return ov;
 }
-function openSheet(p){
+function openSheet(p, conExport){
   const ov = ensureSheet();
   const box = document.getElementById('sheetBox');
-  const prices = '<div class="sprices" id="sheetPrices">' + priceRows(p.ref, true) + bestBlock(p.ref) + '</div>';
+  const prices = '<div class="sprices" id="sheetPrices">' + priceRows(p.ref, true) + bestBlock(p.ref) +
+                 (conExport ? exportBlock(p.ref) : '') + '</div>';
   const cached = descCache[p.ref];
   const descInit = (cached && cached.v) ? descHTML(cached.v) : '<span style="color:#bbb">caricamento caratteristiche tecniche\u2026</span>';
   box.innerHTML =
@@ -908,7 +989,7 @@ function openSheet(p){
   (async () => {
     const refresh = () => {
       const pe = document.getElementById('sheetPrices');
-      if(pe) pe.innerHTML = priceRows(p.ref, true) + bestBlock(p.ref);
+      if(pe) pe.innerHTML = priceRows(p.ref, true) + bestBlock(p.ref) + (conExport ? exportBlock(p.ref) : '');
     };
     await loadFX();
     refresh();
