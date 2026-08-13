@@ -32,8 +32,17 @@ h1 img{width:26px;height:26px;border-radius:50%;background:#fff;padding:2px}
 .src.dis{font-size:7px;opacity:.4;letter-spacing:0;max-width:none;line-height:1.2}
 h1 .mark{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:#b08d3f;color:#12182b;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.5px;margin-right:6px;vertical-align:middle}
 #lastSync{font-family:'DM Mono',monospace;font-size:10px;color:var(--dim)}
-#chfBox{display:none;margin-top:10px;background:var(--navy2);border:1px solid var(--line);border-radius:12px;padding:12px}
-#chfBox.on{display:block}
+#setBox{display:none;margin-top:10px;background:var(--navy2);border:1px solid var(--line);border-radius:12px;padding:13px}
+#setBox.on{display:block}
+.setTitle{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
+.setHint{font-size:11.5px;color:var(--dim);line-height:1.5;margin-bottom:10px}
+.improw{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+.improw .st{margin-left:auto;font-family:'DM Mono',monospace;font-size:10px;color:var(--dim)}
+.btn.mini{padding:5px 11px;font-size:11px}
+#impBar{display:none;height:3px;background:var(--line);border-radius:2px;margin-top:10px;overflow:hidden}
+#impFill{height:100%;width:0;background:var(--gold);transition:width .2s}
+.chfInfo .ok{color:var(--green)}
+.chfInfo .ko{color:var(--red)}
 .chfTitle{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
 #chfText{width:100%;height:78px;background:var(--navy);border:1px solid var(--line);border-radius:9px;color:var(--txt);font-family:'DM Mono',monospace;font-size:11px;padding:9px;outline:none;resize:vertical}
 .chfBtns{display:flex;gap:7px;margin-top:9px}
@@ -203,18 +212,28 @@ body.sheet-open{overflow:hidden}
   <div class="toolbar">
     <input id="search" type="search" placeholder="Cerca referenza, materiale…" autocomplete="off">
     <button class="btn gold" id="btnRefresh">Aggiorna</button>
-    <button class="btn" id="btnChf" title="Incolla il listino svizzero">CHF</button>
+    <button class="btn" id="btnSet" title="Impostazioni e aggiornamento listini">Impostazioni</button>
   </div>
   <div class="chips" id="chips"></div>
-  <div id="chfBox">
-    <div class="chfTitle">Listino svizzero</div>
-    <textarea id="chfText" placeholder='Incolla qui il listino raccolto da patek.com'></textarea>
+  <div id="setBox">
+    <div class="setTitle">Aggiornamento listini</div>
+    <div class="setHint">Attiva la VPN sul paese del mercato, poi premi Aggiorna. Il browser legge patek.com con l’indirizzo della VPN, quindi riceve il listino di quel paese.</div>
+    <div id="impStato"></div>
+    <div id="impBar"><div id="impFill"></div></div>
+    <div class="chfInfo" id="impInfo"></div>
+    <div class="chfBtns">
+      <button class="btn" id="btnProva">Prova connessione</button>
+      <button class="btn" id="btnEsporta">Esporta listini</button>
+      <button class="btn" id="btnSetClose">Chiudi</button>
+    </div>
+    <div class="setTitle" style="margin-top:14px">Importazione manuale</div>
+    <textarea id="chfText" placeholder="Incolla qui un listino raccolto altrove"></textarea>
     <div class="chfBtns">
       <button class="btn gold" id="chfSave">Importa</button>
-      <button class="btn" id="chfClear">Svuota</button>
-      <button class="btn" id="chfClose">Chiudi</button>
+      <button class="btn" id="chfClear">Svuota importati</button>
     </div>
     <div class="chfInfo" id="chfInfo"></div>
+  </div>
   </div>
 </header>
 
@@ -238,7 +257,7 @@ body.sheet-open{overflow:hidden}
 
 <footer>
   <div class="src">patek.com · listino EU gen 2026 (€) · novità W&amp;W in CHF</div>
-  <div class="src" style="opacity:.35;font-size:8px">versione 13.08 c</div>
+  <div class="src" style="opacity:.35;font-size:8px">versione 13.08 d</div>
   <div class="src dis">Strumento privato non ufficiale · marchi e contenuti Patek Philippe SA · nessuna affiliazione</div>
 </footer>
 
@@ -480,7 +499,18 @@ async function loadChfRepo(){
     }
   }catch(e){}
 }
+// listini raccolti dal browser con la VPN, uno per mercato
+const LIST_KEY = 'pp_listini_v1';
+let listini = (() => { try{ const r = localStorage.getItem(LIST_KEY); return r ? JSON.parse(r) : {}; }catch(e){ return {}; } })();
+if(!listini.mercati) listini = {mercati: {CHF: {}, EUR: {}, USD: {}}, meta: {}};
+function saveListini(){ try{ localStorage.setItem(LIST_KEY, JSON.stringify(listini)); }catch(e){} }
+function listOf(cur, ref){
+  const m = listini.mercati[cur];
+  return (m && m[ref] != null) ? m[ref] : null;
+}
 function chfOf(ref){
+  const l = listOf('CHF', ref);
+  if(l != null) return l;
   if(chfRepo[ref] != null) return chfRepo[ref];
   if(chfList[ref] != null) return chfList[ref];
   return null;
@@ -558,6 +588,126 @@ function bestMarket(ref){
   return {cur: keys[0], chf: m[keys[0]], secondo: keys[1], scarto: m[keys[1]] - m[keys[0]], tutti: m};
 }
 // blocco riepilogo sotto i listini, in stile scheda
+// ---------- raccolta listini dal browser (con VPN) ----------
+// Il browser esce con l'IP della VPN: patek.com serve il listino di quel paese.
+// Funziona solo se patek.com accetta richieste da un altro sito: il test lo verifica.
+let raccoltaInCorso = false;
+function setImpInfo(t){ const el = document.getElementById('impInfo'); if(el) el.innerHTML = t; }
+
+async function provaDiretta(){
+  const out = {diretta: false, valuta: null, prezzo: null, errore: null};
+  try{
+    const r = await fetch(FINDER.replace('/watch-finder', '/nautilus/5811-1g-001'), {mode: 'cors', cache: 'no-store'});
+    if(!r.ok){ out.errore = 'HTTP ' + r.status; return out; }
+    const p = parsePrice(await r.text());
+    out.diretta = true;
+    if(p){ out.valuta = p.cur; out.prezzo = p.v; }
+    else out.errore = 'pagina letta ma senza prezzo';
+  }catch(e){
+    out.errore = 'patek.com non accetta richieste dirette da questo sito';
+  }
+  return out;
+}
+
+// elenco modelli letto direttamente da patek.com
+async function elencoDiretto(){
+  const r = await fetch(FINDER, {mode: 'cors', cache: 'no-store'});
+  if(!r.ok) throw new Error('elenco HTTP ' + r.status);
+  const t = await r.text();
+  const doc = new DOMParser().parseFromString(t, 'text/html');
+  const seen = new Set(), out = [];
+  doc.querySelectorAll('a[href]').forEach(a => {
+    const href = a.getAttribute('href') || '';
+    const m = href.match(/\/collection\/([a-z0-9-]+)\/([a-z0-9-]+)\/?$/i);
+    if(!m) return;
+    const col = m[1].toLowerCase(), slug = m[2].toLowerCase();
+    if(!COLLECTIONS[col] || /all-watches|all-models/.test(slug)) return;
+    const id = col + '/' + slug;
+    if(seen.has(id)) return;
+    seen.add(id);
+    out.push({ref: slugToRef(slug), url: 'https://www.patek.com/en/collection/' + id});
+  });
+  return out;
+}
+
+async function raccogli(curAtteso){
+  if(raccoltaInCorso) return;
+  raccoltaInCorso = true;
+  const bar = document.getElementById('impBar');
+  const fill = document.getElementById('impFill');
+  if(bar) bar.style.display = 'block';
+  try{
+    setImpInfo('Lettura elenco modelli\u2026');
+    const items = await elencoDiretto();
+    setImpInfo(items.length + ' modelli trovati. Lettura prezzi\u2026');
+
+    const trovati = {};
+    let fatti = 0, senza = 0, sbagliati = 0;
+    const coda = items.slice();
+    const worker = async () => {
+      while(coda.length){
+        const it = coda.shift();
+        try{
+          const r = await fetch(it.url, {mode: 'cors', cache: 'no-store'});
+          const p = parsePrice(await r.text());
+          if(p && p.cur === curAtteso) trovati[it.ref] = p.v;
+          else if(p) sbagliati++;
+          else senza++;
+        }catch(e){ senza++; }
+        fatti++;
+        if(fill) fill.style.width = Math.round(fatti / items.length * 100) + '%';
+        if(fatti % 10 === 0) setImpInfo('Lette ' + fatti + ' di ' + items.length + ' \u00B7 ' + Object.keys(trovati).length + ' prezzi in ' + curAtteso);
+      }
+    };
+    await Promise.all([worker(), worker(), worker(), worker()]);
+
+    const n = Object.keys(trovati).length;
+    if(sbagliati > n && n === 0){
+      setImpInfo('<span class="ko">patek.com risponde in un\u2019altra valuta: la VPN non \u00E8 sul paese giusto.</span>');
+    }else if(n === 0){
+      setImpInfo('<span class="ko">Nessun prezzo raccolto.</span>');
+    }else{
+      listini.mercati[curAtteso] = trovati;
+      listini.meta[curAtteso] = {n, data: new Date().toISOString().slice(0, 10)};
+      saveListini();
+      render();
+      statoListini();
+      setImpInfo('<span class="ok">' + n + ' prezzi in ' + curAtteso + ' aggiornati.</span>' +
+                 (sbagliati ? ' ' + sbagliati + ' in altra valuta ignorati.' : ''));
+    }
+  }catch(e){
+    setImpInfo('<span class="ko">Raccolta non riuscita: ' + esc(String(e.message || e)) + '</span>');
+  }
+  if(bar) bar.style.display = 'none';
+  if(fill) fill.style.width = '0';
+  raccoltaInCorso = false;
+}
+
+function statoListini(){
+  const el = document.getElementById('impStato');
+  if(!el) return;
+  const nomi = {CHF: '\uD83C\uDDE8\uD83C\uDDED Svizzera', EUR: '\uD83C\uDDEA\uD83C\uDDFA Italia', USD: '\uD83C\uDDFA\uD83C\uDDF8 Stati Uniti'};
+  el.innerHTML = ['CHF','EUR','USD'].map(c => {
+    const m = listini.meta[c];
+    const rep = (c === 'CHF' && Object.keys(chfRepo).length) ? Object.keys(chfRepo).length + ' pubblicate' : '';
+    const stato = m ? m.n + ' ref \u00B7 ' + m.data : (rep || 'mai aggiornato');
+    return '<div class="improw"><span>' + nomi[c] + '</span>' +
+           '<span class="st">' + esc(stato) + '</span>' +
+           '<button class="btn mini" data-cur="' + c + '">Aggiorna</button></div>';
+  }).join('');
+  el.querySelectorAll('button[data-cur]').forEach(b => {
+    b.onclick = () => raccogli(b.dataset.cur);
+  });
+}
+
+function esportaListini(){
+  const j = JSON.stringify(listini, null, 0);
+  navigator.clipboard.writeText(j).then(
+    () => setImpInfo('<span class="ok">Listini copiati negli appunti.</span>'),
+    () => setImpInfo('Copia non riuscita. Testo:<br><textarea style="width:100%;height:60px">' + esc(j) + '</textarea>')
+  );
+}
+
 // ---------- analisi export, netto IVA ----------
 // CH 8.1%, IT 22%; il listino USA e' gia' al netto (la sales tax si aggiunge alla cassa e non si recupera)
 const VAT = {CHF: 0.081, EUR: 0.22, USD: 0};
@@ -643,6 +793,10 @@ function priceSet(ref){
   if(rt && rec[rt[1]] == null) rec[rt[1]] = rt[0];
   const c = chfOf(ref);
   if(c != null) rec.CHF = c;
+  for(const cur of ['EUR','USD']){
+    const l = listOf(cur, ref);
+    if(l != null) rec[cur] = l;
+  }
   return rec;
 }
 function priceRows(ref){
@@ -1145,13 +1299,27 @@ async function refresh(force){
 }
 
 document.getElementById('btnRefresh').onclick = () => refresh(true);
-const chfBox = document.getElementById('chfBox');
-document.getElementById('btnChf').onclick = () => { chfBox.classList.toggle('on'); chfInfo(); };
-document.getElementById('chfClose').onclick = () => chfBox.classList.remove('on');
+const setBox = document.getElementById('setBox');
+document.getElementById('btnSet').onclick = () => { setBox.classList.toggle('on'); chfInfo(); statoListini(); };
+document.getElementById('btnSetClose').onclick = () => setBox.classList.remove('on');
+document.getElementById('btnEsporta').onclick = esportaListini;
+document.getElementById('btnProva').onclick = async () => {
+  setImpInfo('Prova in corso\u2026');
+  const r = await provaDiretta();
+  if(!r.diretta){
+    setImpInfo('<span class="ko">Connessione diretta bloccata.</span> ' + esc(r.errore || '') +
+               '<br>L\u2019aggiornamento automatico non \u00E8 possibile da qui: resta l\u2019importazione manuale.');
+  }else if(r.valuta){
+    setImpInfo('<span class="ok">Connessione diretta attiva.</span> patek.com risponde in <b>' + r.valuta +
+               '</b> (' + r.prezzo.toLocaleString('it-IT') + '). Premi Aggiorna sul mercato corrispondente.');
+  }else{
+    setImpInfo('Connessione riuscita ma nessun prezzo letto. ' + esc(r.errore || ''));
+  }
+};
 document.getElementById('chfSave').onclick = () => {
   const r = chfImport(document.getElementById('chfText').value.trim());
   document.getElementById('chfInfo').textContent = r.msg;
-  if(r.ok){ document.getElementById('chfText').value = ''; render(); }
+  if(r.ok){ document.getElementById('chfText').value = ''; render(); statoListini(); }
 };
 document.getElementById('chfClear').onclick = () => {
   chfList = {};
