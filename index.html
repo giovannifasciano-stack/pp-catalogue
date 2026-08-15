@@ -483,7 +483,7 @@ body.sheet-open{overflow:hidden}
 
 <footer>
   <div class="src">patek.com · listino EU gen 2026 (€) · novità W&amp;W in CHF</div>
-  <div class="src" style="opacity:.35;font-size:8px">versione 14.08 c</div>
+  <div class="src" id="verLine" style="opacity:.45;font-size:8px">versione —</div>
   <div class="src dis">Strumento privato non ufficiale · marchi e contenuti Patek Philippe SA · nessuna affiliazione</div>
 </footer>
 
@@ -1200,6 +1200,39 @@ function renderNews(){
     localStorage.setItem('pp_migrato_v1', '1');
   }catch(e){}
 })();
+
+// ---------- versione ----------
+// nessun numero scritto a mano: data di pubblicazione del file,
+// piu' la sigla dell'ultima modifica quando GitHub risponde
+const VER_API = 'https://api.github.com/repos/giovannifasciano-stack/pp-catalogue/commits?path=index.html&per_page=1';
+function mostraVersione(extra){
+  const el = document.getElementById('verLine');
+  if(!el) return;
+  let d = null;
+  try{ const x = new Date(document.lastModified); if(!isNaN(x)) d = x; }catch(e){}
+  const data = d ? d.toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit', year:'2-digit'}) +
+                   ' ' + d.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'}) : '';
+  el.textContent = 'versione ' + (data || '\u2014') + (extra ? ' \u00B7 ' + extra : '');
+}
+async function versioneRemota(){
+  mostraVersione('');
+  try{
+    const c = JSON.parse(localStorage.getItem('pp_ver_v1') || 'null');
+    if(c && Date.now() - c.ts < 6 * 3600 * 1000){ mostraVersione(c.v); return; }
+    const r = await fetch(VER_API, {cache:'no-store'});
+    if(!r.ok) return;
+    const j = await r.json();
+    if(Array.isArray(j) && j[0] && j[0].sha){
+      const dt = new Date(j[0].commit.author.date);
+      const v = dt.toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit', year:'2-digit'}) +
+                ' ' + dt.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'}) +
+                ' \u00B7 ' + j[0].sha.slice(0, 7);
+      try{ localStorage.setItem('pp_ver_v1', JSON.stringify({v, ts: Date.now()})); }catch(e){}
+      const el = document.getElementById('verLine');
+      if(el) el.textContent = 'versione ' + v;
+    }
+  }catch(e){}
+}
 
 // ---------- lingua ----------
 const I18N = {
@@ -2257,6 +2290,7 @@ document.getElementById('chfClear').onclick = () => {
 document.getElementById('search').addEventListener('input', render);
 
 assicuraLogo();
+versioneRemota();
 altezzaTestata();
 loadChfRepo();
 pullSync();
