@@ -22,16 +22,184 @@
   --green:#8fb573; --red:#c96a5e;
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-body{background:var(--navy);color:var(--txt);font-family:'Outfit',sans-serif;min-height:100vh;padding-bottom:60px}
+html{overflow-x:hidden}
+body{background:var(--navy);color:var(--txt);font-family:'Outfit',sans-serif;min-height:100vh;padding-bottom:60px;
+  overflow-x:hidden;max-width:100%}
+img{max-width:100%}
 
-header{position:sticky;top:0;z-index:50;background:linear-gradient(180deg,var(--navy) 70%,rgba(34,23,16,.94));backdrop-filter:blur(8px);padding:calc(12px + env(safe-area-inset-top)) 16px 10px;border-bottom:1px solid var(--line)}
+header{position:fixed;top:0;left:0;right:0;width:100%;max-width:100vw;z-index:50;background:linear-gradient(180deg,var(--navy) 70%,rgba(34,23,16,.94));backdrop-filter:blur(8px);padding:calc(9px + env(safe-area-inset-top)) 14px 7px;border-bottom:1px solid var(--line)}
 .brandline{display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0}
 h1{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;gap:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin:0;min-width:0}
 h1 span{color:var(--gold2)}
 h1 img{width:26px;height:26px;border-radius:50%;background:#fff;padding:2px}
 .src.dis{font-size:7px;opacity:.4;letter-spacing:0;max-width:none;line-height:1.2}
-h1 .mark{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:#b08d3f;color:#12182b;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.5px;margin-right:6px;vertical-align:middle}
+h1 .mark{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:#b08d3f;margin-right:8px;vertical-align:middle;flex:0 0 auto;overflow:hidden}
 #lastSync{font-family:'DM Mono',monospace;font-size:10px;color:var(--dim)}
+.btn.on{border-color:var(--gold);color:var(--gold2);background:#3a2a1c}
+#brandline{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:0}
+.brandwrap{position:relative;padding-bottom:4px}
+#lastSync{position:absolute;top:2px;right:0}
+
+.navrow{display:flex;gap:7px;margin-top:10px}
+.navrow.second{margin-top:7px}
+.nb{flex:1 1 0;min-width:0;display:flex;align-items:center;justify-content:center;gap:6px;
+  background:transparent;border:1px solid var(--line);border-radius:7px;color:var(--txt);
+  font-family:'Outfit',sans-serif;font-size:13px;padding:8px 10px;cursor:pointer;
+  white-space:nowrap;transition:border-color .15s,color .15s}
+.nb:hover{border-color:var(--gold)}
+.nb.on{border-color:var(--gold);color:var(--gold2)}
+.nb.ico{flex:0 0 42px;font-size:14px;padding:8px 0}
+.nb.sm{flex:0 0 auto;padding:8px 12px;font-size:12.5px}
+.navrow.second .nb.sm:last-child{flex:1 1 0}
+.nb .ni{font-size:13px;line-height:1;opacity:.85}
+.nb .nt{overflow:hidden;text-overflow:ellipsis}
+.nb .cnt{min-width:20px;height:20px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+  font-family:'Outfit';font-size:11px;font-weight:600;padding:0 6px}
+.nb .cnt.gold{background:var(--gold);color:#221710}
+.nb .cnt.green{background:var(--green);color:#14210c}
+
+#searchRow{display:none;margin-top:7px}
+#searchRow.on{display:block}
+#searchRow input{width:100%;background:var(--navy2);border:1px solid var(--line);border-radius:7px;
+  color:var(--txt);font-family:'DM Mono',monospace;font-size:16px;padding:9px 11px;outline:none}
+
+@media (max-width:430px){
+  .navrow{gap:6px;margin-top:9px}
+  .navrow.second{margin-top:6px}
+  .nb{font-size:12px;padding:7px 7px;gap:5px}
+  .nb.ico{flex:0 0 36px;font-size:13px;padding:7px 0}
+  .nb.sm{padding:7px 10px;font-size:11.5px}
+  .nb .ni{font-size:12px}
+  .nb .cnt{min-width:18px;height:18px;font-size:10px;padding:0 5px}
+  }
+.mark img{width:74%;height:74%;object-fit:contain;display:block}
+.wordmark{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:25px;letter-spacing:.13em;
+  text-transform:uppercase;color:#fff;line-height:1;white-space:nowrap}
+@media (max-width:430px){.wordmark{font-size:19px;letter-spacing:.09em}}
+.hcat{font-family:'Cormorant Garamond',serif;font-size:17px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold2)}
+@media (max-width:430px){.hlogo{height:19px}.hcat{font-size:13px;letter-spacing:.12em}}
+.sheet .olog{display:block;height:38px;width:auto;margin:0 auto 4px;object-fit:contain}
+.ordsheet .obrand .olog{height:42px;width:auto;display:block;object-fit:contain}
+.ordsheet .obrand .gv{text-align:left;margin-top:2px}
+#langPick{display:inline-flex;gap:5px;margin-left:2px}
+#langPick button{background:transparent;border:1px solid var(--line);border-radius:8px;color:var(--dim);
+  font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.08em;padding:9px 10px;cursor:pointer}
+#langPick button.on{border-color:var(--gold);color:var(--gold2);background:#3a2a1c}
+
+.ca{position:absolute;top:7px;left:7px;z-index:3;width:27px;height:27px;border-radius:7px;font-size:13px!important;
+  border:1px solid rgba(34,23,16,.18);background:rgba(255,255,255,.86);color:#8a8175;font-size:15px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);
+  box-shadow:0 1px 4px rgba(0,0,0,.14)}
+.ca.on{color:#d6456a;border-color:#d6456a;background:rgba(255,255,255,.95)}
+.ca.own.on{color:var(--green);border-color:var(--green)}
+.card.picked{border-color:var(--green)}
+.cbox{position:absolute;top:7px;right:7px;z-index:3;width:27px;height:27px;border-radius:7px;
+  border:1px solid #6d9455;background:rgba(255,255,255,.86);color:#4f7a3a;font-size:15px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);
+  box-shadow:0 1px 4px rgba(0,0,0,.14)}
+.cbox.on{background:#6d9455;color:#fff;font-weight:700;border-color:#6d9455}
+.cown{width:calc(100% - 18px);margin:8px 9px 0;background:rgba(27,18,12,.6);border:1px solid var(--line);border-radius:20px;
+  color:var(--dim);font-family:'DM Mono',monospace;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;
+  padding:7px 8px;cursor:pointer;margin-top:2px}
+.cown.on{border-color:var(--gold);color:var(--gold2)}
+.vuoto{text-align:center;color:var(--dim);font-size:13.5px;line-height:1.8;padding:40px 12px}
+.ordhead{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;border-bottom:1px solid var(--line);padding-bottom:9px;margin-bottom:14px}
+.ordhead h2{font-family:'Cormorant Garamond',serif;font-size:23px;font-weight:500;letter-spacing:.12em;text-transform:uppercase;margin:0}
+.obtns{margin-left:auto;display:flex;gap:7px;flex-wrap:wrap}
+.ob{background:transparent;border:1px solid var(--line);border-radius:6px;color:var(--dim);
+  font-family:'Outfit';font-size:11.5px;letter-spacing:.04em;padding:8px 13px;cursor:pointer}
+.ob.sel{border-color:var(--green);color:var(--green)}
+.ob.gold{background:var(--gold);border-color:var(--gold);color:#221710;font-weight:600}
+.wishbar{background:var(--navy2);border:1px solid var(--line);border-radius:12px;padding:15px;margin-bottom:18px;max-width:100%;overflow-x:hidden}
+.wsec{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin:12px 0 9px}
+.wsec:first-child{margin-top:0}
+.wrow{display:flex;gap:14px;flex-wrap:wrap;align-items:flex-end}
+.wf{flex:1;min-width:170px;margin-bottom:8px}
+.wf label{display:block;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;color:var(--dim);margin-bottom:4px}
+.wishbar input,.wishbar select,.wishbar textarea{width:100%;max-width:100%;box-sizing:border-box;background:var(--navy);border:1px solid var(--line);
+  border-radius:8px;color:var(--txt);font-family:'Outfit';font-size:16px;padding:9px 11px;outline:none}
+.wishbar textarea{font-size:14px;height:62px;resize:vertical;margin-top:7px}
+.wishbar input.wpc{width:58px;display:inline-block;padding:4px 7px;font-size:13px;text-align:right;margin:0 4px}
+.wchk{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--txt);margin:9px 0;cursor:pointer}
+.wchk input{width:auto!important}
+.pick{display:flex;gap:6px;flex-wrap:wrap}
+.pick button{flex:1;background:var(--navy);border:1px solid var(--line);border-radius:8px;color:var(--dim);
+  font-family:'DM Mono',monospace;font-size:12px;padding:9px 6px;cursor:pointer}
+.pick button.on{border-color:var(--gold);color:var(--gold2);background:#3a2a1c}
+.wboxes{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+@media (max-width:820px){.wboxes{grid-template-columns:1fr}}
+.wbox{background:var(--navy);border:1px solid var(--line);border-radius:10px;padding:12px}
+.wbh{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:9px}
+.waddr{font-size:12.5px;line-height:1.7;color:var(--txt);opacity:.9;padding:9px 0}
+.wman-h{font-size:11px;color:var(--dim);margin:10px 0 6px;padding-top:9px;border-top:1px solid var(--line)}
+.btabs{display:flex;gap:6px;flex-wrap:wrap}
+.btabs button{flex:1 1 45%;background:var(--navy2);border:1px solid var(--line);border-radius:8px;color:var(--dim);
+  font-family:'Outfit';font-size:12px;padding:9px 6px;cursor:pointer}
+.btabs button.on{border-color:var(--gold);color:var(--gold2);background:#3a2a1c}
+.srow{display:flex;gap:7px}
+.srow input{flex:1}
+.mini{background:var(--card);border:1px solid var(--line);border-radius:8px;color:var(--gold2);
+  font-size:13px;padding:8px 12px;cursor:pointer;white-space:nowrap}
+.mini.x{color:var(--dim);font-size:12px;padding:5px 9px}
+.fstat{font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);margin:6px 0}
+.fstat .cerca{color:var(--gold2)}
+.fstat .ko{color:var(--red)}
+.fres-r{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line)}
+.fres-r .n{font-size:12.5px;color:var(--txt)}
+.fres-r .s{font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);margin-top:2px}
+.fres-r button{margin-left:auto}
+.flist{max-height:160px;overflow:auto;margin-top:8px}
+.wfoot{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:15px;padding-top:13px;border-top:1px solid var(--line)}
+.wact{margin-left:auto;display:flex;gap:8px}
+.wtot{display:flex;align-items:baseline;gap:13px;font-family:'DM Mono',monospace;font-size:11px;color:var(--dim)}
+.wtot .big{font-size:18px;color:var(--gold2)}
+.wsync{font-family:'DM Mono',monospace;font-size:9.5px;color:var(--dim);margin-top:11px}
+.wsync span{color:var(--green)}
+.ordsheet .ohead{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap}
+.ordsheet .obrand .pp{font-family:'Cormorant Garamond',serif;font-size:26px;letter-spacing:.13em;text-transform:uppercase;color:#1a1a1a;font-weight:500;line-height:1.1}
+.ordsheet .obrand .gv{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:14px;color:#8a8a8a;text-align:center}
+.ordsheet .ometa{text-align:right}
+.ordsheet .olabel{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:#b08d3f}
+.ordsheet .ono{font-family:'DM Mono',monospace;font-size:16px;color:#1a1a1a;margin-top:3px}
+.ordsheet .odate{font-size:10.5px;color:#6d7178;margin-top:2px}
+.ordsheet .ocols{display:flex;gap:26px;margin-top:18px;padding-top:16px;border-top:2px solid #1a1a1a;flex-wrap:wrap}
+.ordsheet .ocol{flex:1;min-width:180px}
+.ordsheet .oh{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:#b08d3f;border-bottom:1px solid #e6e0d6;padding-bottom:6px;margin-bottom:8px}
+.ordsheet .pname{font-size:15px;font-weight:500;color:#1a1a1a}
+.ordsheet .paddr2{font-size:12.5px;line-height:1.6;color:#6d7178;margin-top:3px}
+.ordsheet .ordtable{width:100%;border-collapse:collapse;font-size:11px;margin-top:26px;table-layout:fixed}
+.ordsheet .ordtable td,.ordsheet .ordtable th{word-break:break-word}
+.ordsheet .ordtable th{font-weight:400;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:#a2a2a2;background:#faf8f4;padding:9px 6px;text-align:left}
+.ordsheet .ordtable th.r,.ordsheet .ordtable td.r{text-align:right;padding-left:8px}
+.ordsheet .ordtable td{padding:9px 6px 9px 0;border-bottom:1px solid #f1ede6;color:#14161a;vertical-align:top}
+.ordsheet .ordtable td.ph{width:58px;padding-left:6px}
+.ordsheet .ordtable td.ph .box{width:50px;height:50px;background:#f7f5f0;border:1px solid #e3ded4;border-radius:4px;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.ordsheet .ordtable td.ph img{width:100%;height:100%;object-fit:contain;padding:4px}
+.ordsheet .ordtable .d1{font-size:12.5px;font-weight:500;color:#1a1a1a}
+.ordsheet .ordtable .d2{font-size:10px;color:#6d7178;margin-top:2px}
+.ordsheet .ordtable td.r.gold{font-family:'DM Mono',monospace;font-size:12px;color:#1a1a1a;white-space:nowrap}
+.ordsheet .ordtotals{margin-top:14px;margin-left:auto;width:380px;max-width:100%}
+.ordsheet .orow{display:flex;justify-content:space-between;gap:16px;padding:7px 0;font-size:13px;border-bottom:1px solid #f1ede6}
+.ordsheet .orow .v{white-space:nowrap;font-family:'DM Mono',monospace}
+.ordsheet .orow.big{border-bottom:none;border-top:2px solid #1a1a1a;margin-top:3px;padding-top:9px;font-size:15px;font-weight:600}
+.ordsheet .orow .v.gold{color:#b08d3f}
+.ordsheet .orow.small{font-size:11px;color:#6d7178;border-bottom:none}
+.ordsheet .ordpay{margin-top:12px;margin-left:auto;width:380px;max-width:100%;font-size:11.5px;color:#6d7178}
+.ordsheet .ordpay .k{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:#b08d3f;margin-right:6px}
+.ordsheet .ofoot{margin-top:22px;padding-top:11px;border-top:1px solid #f1ede6;font-size:10px;line-height:1.65;color:#a2a2a2}
+.ordsheet .ofoot b{color:#6d7178;font-weight:500}
+.ordsheet .fxrow{margin-top:7px}
+@media (max-width:640px){
+  .ordsheet .ometa{text-align:left}
+  .ordsheet .ohead{gap:10px}
+  .ordsheet .ordtable{font-size:10px;margin-top:16px}
+  .ordsheet .ordtotals,.ordsheet .ordpay{width:100%}
+}
+.sheet .paddr2{font-size:12px;line-height:1.65;color:#2a2a2a}
+.sheet .dtx{margin-top:13px;background:#f6f2e8;border-left:3px solid #b08d3f;padding:11px 13px;
+  font-family:'DM Mono',monospace;font-size:11px;color:#3a3a3a;line-height:1.6}
+.sheet .dtx b{color:#6b5a34}
+.sheet .dtxn{font-size:8px;color:#a2a2a2}
 #setBox{display:none;margin-top:10px;background:var(--navy2);border:1px solid var(--line);border-radius:12px;padding:13px}
 #setBox.on{display:block}
 .setTitle{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:6px}
@@ -47,16 +215,23 @@ h1 .mark{display:inline-flex;align-items:center;justify-content:center;width:28p
 #chfText{width:100%;height:78px;background:var(--navy);border:1px solid var(--line);border-radius:9px;color:var(--txt);font-family:'DM Mono',monospace;font-size:11px;padding:9px;outline:none;resize:vertical}
 .chfBtns{display:flex;gap:7px;margin-top:9px}
 .chfInfo{font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);margin-top:8px}
-@media (max-width:430px){h1{font-size:15px;letter-spacing:.04em}h1 .mark{width:22px;height:22px;font-size:9px;margin-right:2px}#lastSync{font-size:9px}}
+@media (max-width:430px){h1{font-size:15px;letter-spacing:.04em}h1 .mark{width:26px;height:26px;margin-right:6px}#lastSync{font-size:9px}}
 
-.toolbar{display:flex;gap:8px;margin-top:12px}
+.toolbar{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.toolbar #search{flex:1 1 100%;min-width:0}
+.toolbar .btn{flex:0 0 auto}
+@media (max-width:640px){
+  .toolbar{gap:6px}
+  .toolbar .btn{font-size:12.5px;padding:9px 11px}
+  #langPick button{padding:8px 8px;font-size:10.5px}
+}
 .toolbar input{flex:1;background:var(--navy2);border:1px solid var(--line);border-radius:10px;color:var(--txt);font-family:'DM Mono',monospace;font-size:13px;padding:9px 12px;outline:none}
 .toolbar input:focus{border-color:var(--gold)}
 button{cursor:pointer;border:none;font-family:'Outfit',sans-serif}
 .btn{background:var(--navy2);border:1px solid var(--line);color:var(--txt);border-radius:10px;padding:9px 13px;font-size:13px;font-weight:500;white-space:nowrap}
 .btn.gold{background:var(--gold);color:#14233f;border-color:var(--gold);font-weight:600}
 
-.chips{display:flex;gap:7px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:none}
+.chips{display:flex;gap:6px;overflow-x:auto;padding:8px 0 1px;scrollbar-width:none;max-width:100%;-webkit-overflow-scrolling:touch}
 .chips::-webkit-scrollbar{display:none}
 .chip{flex:0 0 auto;background:var(--navy2);border:1px solid var(--line);color:var(--dim);border-radius:999px;padding:6px 13px;font-size:12px;font-weight:500}
 .chip b{color:var(--txt);font-weight:600}
@@ -72,35 +247,65 @@ button{cursor:pointer;border:none;font-family:'Outfit',sans-serif}
 #newsbar p{font-size:12.5px;color:var(--dim);line-height:1.5}
 #newsbar p b{color:var(--txt)}
 
-main{padding:8px 16px}
+main{padding:8px 16px;max-width:100%;overflow-x:hidden}
 .brand-section{margin-top:22px}
 .brand-head{display:flex;align-items:baseline;justify-content:space-between;border-bottom:1px solid var(--line);padding-bottom:7px;margin-bottom:12px}
 .brand-head h2{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--gold2)}
 .brand-head .cnt{font-family:'DM Mono',monospace;font-size:11px;color:var(--dim)}
 
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
-.card{position:relative;display:block;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden;transition:border-color .15s}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+.card{position:relative;display:flex;flex-direction:column;height:100%;overflow:hidden;
+  background:var(--card);border:1px solid var(--line);border-radius:12px;padding:0;
+  text-decoration:none;color:inherit;transition:border-color .18s, transform .18s}
+.card:hover{border-color:var(--gold);transform:translateY(-2px)}
 .card:active{border-color:var(--gold)}
-.thumb{width:100%;aspect-ratio:1;background:#fff;display:flex;align-items:center;justify-content:center;overflow:hidden}
-.thumb img{width:100%;height:100%;object-fit:contain}
-.thumb .noimg{font-family:'DM Mono',monospace;font-size:10px;color:#999}
-.thumb{cursor:zoom-in}
 
+/* riquadro foto: ottagono come su AP, in tono caldo */
+.thumb{width:100%;aspect-ratio:1;cursor:zoom-in;position:relative;overflow:hidden;
+  background:#fff;display:grid;place-items:center}
+.thumb img{width:100%;height:100%;object-fit:contain;transition:transform .3s}
+.card:hover .thumb img{transform:scale(1.06)}
+.thumb .noimg{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--dim);text-align:center;padding:0 12px}
+
+.meta{width:100%;display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;padding:9px 9px 11px}
 .card .ref{cursor:pointer;text-decoration:underline;text-decoration-color:transparent;transition:text-decoration-color .15s}
 .card .ref:hover{text-decoration-color:currentColor}
-.meta{padding:9px 10px 11px}
-.meta .ref{font-family:'DM Mono',monospace;font-size:14px;color:var(--gold2)}
-.meta .mat{font-size:12px;color:var(--txt);margin-top:4px;line-height:1.3;min-height:2.6em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-.meta .col{font-family:'DM Mono',monospace;font-size:10px;color:var(--dim);letter-spacing:.1em;text-transform:uppercase;margin-top:5px}
-.meta .price{font-family:'DM Mono',monospace;font-size:14px;color:var(--gold2);margin-top:6px}
-.meta .price.est{font-size:10.5px;color:var(--dim);margin-top:2px}
-.meta .prices{margin-top:6px}
-.meta .prices{border-top:1px solid var(--line);padding-top:7px}
-.meta .prices .price{display:flex;justify-content:space-between;align-items:baseline;gap:10px;font-family:'DM Mono',monospace;margin:2px 0}
-.meta .prices .pc{font-size:11px;letter-spacing:.06em;color:var(--dim);white-space:nowrap}
-.meta .prices .pv{font-size:13px;color:var(--gold2);text-align:right;letter-spacing:.01em}
-.meta .prices .price.wait{color:var(--dim);opacity:.45}
-.badge{position:absolute;top:8px;left:8px;font-family:'DM Mono',monospace;font-size:9.5px;font-weight:500;letter-spacing:.08em;padding:3px 8px;border-radius:6px;z-index:2;background:var(--green);color:#0a1428}
+.meta .mname{font-family:'Outfit',sans-serif;font-weight:600;font-size:10.5px;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--txt);text-align:center;line-height:1.35;min-height:2.7em;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.meta .ref{font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.03em;
+  color:var(--dim);text-align:center;line-height:1.3;min-height:1.3em}
+.meta .mat{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--gold);text-align:center;min-height:1.2em;line-height:1.4}
+.meta .col{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--dim);text-align:center}
+.meta .prices{width:100%;border-top:1px solid var(--line);padding-top:9px;margin-top:auto;
+  display:flex;flex-direction:column;gap:3px}
+.meta .prices .price{display:flex;justify-content:space-between;gap:10px;font-family:'DM Mono',monospace;margin:0}
+.meta .prices .pc{font-size:9.5px;letter-spacing:.07em;color:var(--dim);white-space:nowrap}
+.meta .prices .pv{font-size:10.5px;color:var(--gold2);letter-spacing:.02em;font-variant-numeric:tabular-nums;text-align:right}
+.meta .prices .price.wait{opacity:.4}
+.meta .price{font-family:'DM Mono',monospace;font-size:12px;color:var(--gold2)}
+
+.badge{position:absolute;top:10px;right:10px;font-family:'DM Mono',monospace;font-size:8.5px;
+  letter-spacing:.16em;text-transform:uppercase;padding:2px 7px;border-radius:2px;z-index:2;
+  border:1px solid var(--gold);color:var(--gold);background:rgba(34,23,16,.7)}
+
+@media (max-width:640px){
+  .grid{grid-template-columns:repeat(2,1fr);gap:9px}
+  .meta .mname{font-size:10.5px}
+  .meta .ref{font-size:12px}
+  .card{gap:0}
+  .meta{padding:9px 9px 11px}
+  .meta .mname{font-size:10.5px;min-height:2.6em}
+  .meta .ref{font-size:11px}
+  .ca,.cbox{width:28px;height:28px;font-size:13px;top:7px}
+  .ca{left:7px}.cbox{right:7px}
+  .cown{font-size:8.5px;letter-spacing:.08em;padding:6px 6px}
+  .meta .prices .pc{font-size:9.5px}
+  .meta .prices .pv{font-size:10.5px}
+}
 
 #empty{display:none;text-align:center;padding:60px 20px;color:var(--dim);font-size:14px}
 #loader{display:none;flex-direction:column;align-items:center;gap:16px;padding:70px 20px}
@@ -157,7 +362,7 @@ body.sheet-open{overflow:hidden}
 .sheet .tct{font-family:'DM Mono',monospace;font-size:7.5px;letter-spacing:.2em;text-transform:uppercase;color:#b08d3f;margin-bottom:3px}
 .sheet .tcb{font-size:10.5px;line-height:1.55;color:#3a3a3a}
 
-.sheet .exp{margin-top:22px;text-align:left}
+.sheet .exp{margin-top:22px;text-align:left;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .sheet .exph{font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:#b08d3f;border-bottom:1px solid #e6e0d6;padding-bottom:6px;margin-bottom:8px}
 .sheet .exptab{width:100%;border-collapse:collapse;font-family:'DM Mono',monospace;font-size:9.5px}
 .sheet .exptab th{font-weight:400;font-size:7px;letter-spacing:.13em;text-transform:uppercase;color:#a2a2a2;padding:0 6px 6px;text-align:left}
@@ -186,6 +391,9 @@ body.sheet-open{overflow:hidden}
 
 @media print{
   @page{margin:10mm}
+  html,body{padding-top:0!important;padding-bottom:0!important;margin:0!important}
+  header{display:none!important}
+  footer{display:none!important}
   html,body{background:#fff!important}
   body.sheet-open > *:not(#sheetOverlay){display:none!important}
   #sheetOverlay{position:static!important;inset:auto;background:#fff!important;padding:0!important;overflow:visible;height:auto}
@@ -200,6 +408,13 @@ body.sheet-open{overflow:hidden}
   .sheet .exp{margin-top:16px}
   .sheet .exptab{font-size:8.5px}
   .sheet .exptab tr.bestrow td,.sheet .bestbox,.sheet .sprices .price.best{background:#f6f2e8!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .ordsheet .ordtable th,.ordsheet .ordtable td.ph .box{background:#faf8f4!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .ordsheet .ordtable img{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .ordsheet .ordtable tr{page-break-inside:avoid}
+  .ordsheet .ofoot,.ordsheet .ordtotals,.ordsheet .ordpay{page-break-inside:avoid}
+  .ordsheet .ohead{margin-top:0}
+  .ordsheet .ordtable{margin-top:16px}
+  .ordsheet .ofoot{margin-top:14px}
   .sheet .exptab .badge,.sheet .sprices .tag{background:#6b5a34!important;color:#fff!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 </style>
@@ -207,15 +422,23 @@ body.sheet-open{overflow:hidden}
 <body>
 
 <header>
-  <div class="brandline">
-    <h1><span class="mark">PP</span>Patek Philippe <span>Catalogue</span></h1>
-    <div id="lastSync">—</div>
+  <div class="brandwrap">
+    <h1 id="brandline"><span class="mark"><img src="calatrava.png" alt=""></span>Patek Philippe <span>Catalogue</span></h1>
+      <div id="lastSync">—</div>
   </div>
-  <div class="toolbar">
-    <input id="search" type="search" placeholder="Cerca referenza, materiale…" autocomplete="off">
-    <button class="btn gold" id="btnRefresh">Aggiorna</button>
-    <button class="btn" id="btnSet" title="Impostazioni e aggiornamento listini">Impostazioni</button>
+
+  <div class="navrow">
+    <button class="nb ico" id="btnSearch" title="Cerca">🔍</button>
+    <button class="nb" id="btnWish"><span class="ni">♥</span><span class="nt">Lista desideri</span><span class="cnt gold" id="cWish">0</span></button>
+    <button class="nb" id="btnOwn"><span class="ni">📦</span><span class="nt">Posseduti</span><span class="cnt green" id="cOwn">0</span></button>
   </div>
+  <div class="navrow second">
+    <button class="nb sm" data-l="en">🇬🇧 EN</button>
+    <button class="nb sm" data-l="it">🇮🇹 IT</button>
+    <button class="nb ico" id="btnSet" title="Impostazioni">⚙︎</button>
+    <button class="nb sm" id="btnRefresh">Aggiorna</button>
+  </div>
+  <div id="searchRow"><input id="search" type="search" placeholder="Cerca referenza, materiale…" autocomplete="off"></div>
   <div class="chips" id="chips"></div>
   <div id="setBox">
     <div class="setTitle">Aggiornamento listini</div>
@@ -259,7 +482,7 @@ body.sheet-open{overflow:hidden}
 
 <footer>
   <div class="src">patek.com · listino EU gen 2026 (€) · novità W&amp;W in CHF</div>
-  <div class="src" style="opacity:.35;font-size:8px">versione 13.08 e</div>
+  <div class="src" style="opacity:.35;font-size:8px">versione 14.08</div>
   <div class="src dis">Strumento privato non ufficiale · marchi e contenuti Patek Philippe SA · nessuna affiliazione</div>
 </footer>
 
@@ -316,7 +539,7 @@ function bigURL(u){
   return 'https://images.weserv.nl/?url=' + encodeURIComponent(u.replace(/^https?:\/\//,'')) + '&w=1100&output=webp&q=88';
 }
 function thumbURL(u){
-  return 'https://images.weserv.nl/?url=' + encodeURIComponent(u.replace(/^https?:\/\//,'')) + '&w=440&h=440&fit=contain&output=webp&q=72';
+  return 'https://images.weserv.nl/?url=' + encodeURIComponent(u.replace(/^https?:\/\//,'')) + '&w=440&h=440&fit=contain&cbg=none&output=webp&q=82';
 }
 let activeCol = 'ALL';
 
@@ -713,7 +936,7 @@ function esportaListini(){
 // ---------- analisi export, netto IVA ----------
 // CH 8.1%, IT 22%; il listino USA e' gia' al netto (la sales tax si aggiunge alla cassa e non si recupera)
 const VAT = {CHF: 0.081, EUR: 0.22, USD: 0};
-const MERCATI = {CHF: ['\uD83C\uDDE8\uD83C\uDDED', 'Svizzera'], EUR: ['\uD83C\uDDEA\uD83C\uDDFA', 'Italia (UE)'], USD: ['\uD83C\uDDFA\uD83C\uDDF8', 'Stati Uniti']};
+function MERCATI_(){ return {CHF: ['\uD83C\uDDE8\uD83C\uDDED', t('svizzera')], EUR: ['\uD83C\uDDEA\uD83C\uDDFA', t('italia')], USD: ['\uD83C\uDDFA\uD83C\uDDF8', t('statiUniti')]}; }
 function n2(cur, v){
   const o = {minimumFractionDigits: 2, maximumFractionDigits: 2};
   if(cur === 'CHF') return v.toLocaleString('en-US', o).replace(/,/g, '\u2019');
@@ -739,40 +962,44 @@ function exportRows(ref){
   return {rows, best};
 }
 function exportBlock(ref){
+  const MERCATI = MERCATI_();
   const d = exportRows(ref);
   if(!d) return '';
   const {rows, best} = d;
-  let t = '<div class="exp"><div class="exph">Analisi export \u00B7 netto IVA</div>' +
+  let t2 = '<div class="exp"><div class="exph">'+esc(t('analisiExport'))+'</div>' +
     '<table class="exptab"><thead><tr>' +
-    '<th>Mercato</th><th class="r">Listino</th><th class="r">IVA</th>' +
+    '<th>'+esc(t('mercato'))+'</th><th class="r">'+esc(t('listino'))+'</th><th class="r">'+esc(t('iva'))+'</th>' +
     '<th class="r">Net CHF</th><th class="r">Net EUR</th><th class="r">Net USD</th><th class="r">\u0394</th>' +
     '</tr></thead><tbody>';
   for(const r of rows){
     const isBest = r === best;
-    t += '<tr' + (isBest ? ' class="bestrow"' : '') + '>' +
+    t2 += '<tr' + (isBest ? ' class="bestrow"' : '') + '>' +
       '<td>' + MERCATI[r.cur][0] + ' ' + MERCATI[r.cur][1] + '</td>' +
       '<td class="r">' + r.cur + ' ' + n2(r.cur, r.listino) + '</td>' +
       '<td class="r">' + (r.vat ? (r.vat * 100).toFixed(1).replace('.0', '') + '%' : '\u2014') + '</td>' +
       '<td class="r nch">' + n2('CHF', r.netCHF) + '</td>' +
       '<td class="r">' + n2('EUR', r.netEUR) + '</td>' +
       '<td class="r">' + n2('USD', r.netUSD) + '</td>' +
-      '<td class="r">' + (isBest ? '<span class="badge">Migliore</span>' : '+' + r.delta.toFixed(1) + '%') + '</td>' +
+      '<td class="r">' + (isBest ? '<span class="badge">'+esc(t('migliore'))+'</span>' : '+' + r.delta.toFixed(1) + '%') + '</td>' +
       '</tr>';
   }
-  t += '</tbody></table>';
-  t += '<div class="bestbox"><div class="bl">Mercato migliore</div>' +
+  t2 += '</tbody></table>';
+  t2 += '<div class="bestbox"><div class="bl">'+esc(t('mercatoMigliore'))+'</div>' +
     '<div class="bb">' + MERCATI[best.cur][0] + ' <b>' + MERCATI[best.cur][1] + ' \u00B7 ' +
-    best.cur + ' ' + n2(best.cur, best.net) + ' netto</b> ' +
+    best.cur + ' ' + n2(best.cur, best.net) + (LANG === 'en' ? ' net' : ' netto') + '</b> ' +
     '<span class="eq">(CHF ' + n2('CHF', best.netCHF) + ') (USD ' + n2('USD', best.netUSD) + ')</span></div></div>';
-  t += '<div class="expnote">I prezzi netti escludono l\u2019IVA (Svizzera 8.1%, Italia 22%) e sono indicativi di un acquisto in esenzione/export; il rimborso reale \u00E8 di norma inferiore per via delle commissioni d\u2019agenzia. I listini USA sono al netto della sales tax locale, aggiunta alla cassa e non recuperabile. Cambi: 1 CHF = ' +
-    (1 / fx.EURCHF).toFixed(4) + ' EUR = ' + (1 / fx.USDCHF).toFixed(4) + ' USD. Dazi, sdoganamento e condizioni di garanzia non sono inclusi in questo confronto.</div></div>';
-  return t;
+  const notaIt = 'I prezzi netti escludono l\u2019IVA (Svizzera 8.1%, Italia 22%) e sono indicativi di un acquisto in esenzione/export; il rimborso reale \u00E8 di norma inferiore per via delle commissioni d\u2019agenzia. I listini USA sono al netto della sales tax locale, aggiunta alla cassa e non recuperabile. Cambi: 1 CHF = @E EUR = @U USD. Dazi, sdoganamento e condizioni di garanzia non sono inclusi in questo confronto.';
+  const notaEn = 'Net prices exclude VAT (Switzerland 8.1%, Italy 22%) and reflect a tax-free/export purchase; the actual refund is usually lower due to agency fees. US list prices exclude local sales tax, which is added at checkout and is not recoverable. Rates: 1 CHF = @E EUR = @U USD. Duties, customs clearance and warranty terms are not included in this comparison.';
+  t2 += '<div class="expnote">' + (LANG === 'en' ? notaEn : notaIt)
+    .replace('@E', (1 / fx.EURCHF).toFixed(4)).replace('@U', (1 / fx.USDCHF).toFixed(4)) + '</div></div>';
+  return t2;
 }
 function bestBlock(ref){
   const b = bestMarket(ref);
   if(!b || !fx) return '';
   const nf = v => Math.round(v).toLocaleString('en-US').replace(/,/g, '\u2019');
-  const MERCATO = {CHF: 'Svizzera', EUR: 'Italia', USD: 'Stati Uniti'};
+  const M2 = MERCATI_();
+  const MERCATO = {CHF: M2.CHF[1], EUR: M2.EUR[1], USD: M2.USD[1]};
   const riga = ['CHF','EUR','USD'].filter(c => b.tutti[c] != null)
     .map(c => MERCATO[c] + ' ' + nf(b.tutti[c])).join(' \u00B7 ');
   let dt = '';
@@ -782,11 +1009,11 @@ function bestBlock(ref){
   }
   const nomi = MERCATO;
   return '<div class="fxnote">' +
-    'Costo effettivo in franchi' + (dt ? ', cambio del ' + esc(dt) : ', cambio del giorno') + '<br>' +
+    esc(t('costoFranchi')) + (dt ? ', ' + esc(t('cambioDel')) + ' ' + esc(dt) : ', ' + esc(t('cambioGiorno'))) + '<br>' +
     riga + '<br>' +
     '1 USD = ' + fx.USDCHF.toFixed(4) + ' CHF \u00B7 1 EUR = ' + fx.EURCHF.toFixed(4) + ' CHF<br>' +
-    '<span class="save">' + nomi[b.cur] + ' pi\u00F9 conveniente di CHF ' + nf(b.scarto) +
-    ' sul secondo mercato</span></div>';
+    '<span class="save">' + nomi[b.cur][1] + ' ' + esc(t('piuConveniente')) + ' ' + nf(b.scarto) +
+    ' ' + esc(t('sulSecondo')) + '</span></div>';
 }
 // insieme dei tre listini per una referenza
 function priceSet(ref){
@@ -812,7 +1039,7 @@ function priceRows(ref){
       const best = b && b.cur === cur;
       out += '<div class="price' + (best ? ' best' : '') + '">' +
              '<span class="pc">' + FLAG[cur] + ' ' + cur +
-             (best ? '<span class="tag">Migliore</span>' : '') + '</span>' +
+             (best ? '<span class="tag">'+esc(t('migliore'))+'</span>' : '') + '</span>' +
              '<span class="pv">' + fmtAmount(cur, rec[cur]) + '</span></div>';
       any = true;
     }
@@ -957,7 +1184,318 @@ function renderNews(){
 }
 
 // ---------- render ----------
+// travaso una tantum dai dati della versione di prova
+(function migraDaProva(){
+  try{
+    if(localStorage.getItem('pp_migrato_v1')) return;
+    const coppie = [['pp_wl_beta_v1','pp_wl_v1'], ['pp_chf_beta_v1','pp_chf_v1'], ['pp_listini_beta_v1','pp_listini_v1']];
+    for(const [prova, buono] of coppie){
+      const v = localStorage.getItem(prova);
+      if(!v) continue;
+      const attuale = localStorage.getItem(buono);
+      // non sovrascrivo se sul dispositivo c'e' gia' qualcosa di piu' completo
+      if(!attuale || attuale.length < v.length) localStorage.setItem(buono, v);
+    }
+    localStorage.setItem('pp_migrato_v1', '1');
+  }catch(e){}
+})();
+
+// ---------- lingua ----------
+const I18N = {
+  aggiorna:{it:'Aggiorna', en:'Refresh'},
+  lista:{it:'Lista desideri', en:'Wishlist'},
+  posseduti:{it:'Posseduti', en:'Owned'},
+  impostazioni:{it:'Impostazioni', en:'Settings'},
+  tutte:{it:'Tutte', en:'All'},
+  modelli:{it:'modelli', en:'models'},
+  cerca:{it:'Cerca referenza, materiale\u2026', en:'Search reference, material\u2026'},
+  orologi:{it:'orologi', en:'watches'},
+  selezionati:{it:'selezionati', en:'selected'},
+  selTutti:{it:'Seleziona tutti', en:'Select all'},
+  deselTutti:{it:'Deseleziona tutti', en:'Deselect all'},
+  creaOrdine:{it:'Crea ordine', en:'Create order'},
+  chiudiOrdine:{it:'Chiudi ordine', en:'Close order'},
+  valoreListino:{it:'valore a listino', en:'list value'},
+  vuotaLista:{it:'Nessun orologio in lista.<br>Tocca il cuore su una card del catalogo.',
+              en:'No watches in the list.<br>Tap the heart on a catalogue card.'},
+  vuotaPoss:{it:'Nessun orologio registrato.<br>Tocca Segna come posseduto in lista desideri.',
+             en:'No watches recorded.<br>Tap Mark as owned in the wishlist.'},
+  segnaPoss:{it:'Segna come posseduto', en:'Mark as owned'},
+  posseduto:{it:'Posseduto', en:'Owned'},
+  secOrdine:{it:'Ordine', en:'Order'},
+  secTax:{it:'Tax', en:'Tax'},
+  secParties:{it:'Parties', en:'Parties'},
+  nOrdine:{it:'N. ordine', en:'Order no.'},
+  acquistoIn:{it:'Acquisto in', en:'Buying from'},
+  inclConsegna:{it:'Includi data di consegna', en:'Include delivery date'},
+  dataConsegna:{it:'Data di consegna', en:'Delivery date'},
+  inclPagamento:{it:'Includi dettagli di pagamento', en:'Include payment details'},
+  metodo:{it:'Metodo', en:'Payment method'},
+  bonifico:{it:'Bonifico bancario', en:'Bank transfer'},
+  carta:{it:'Carta di credito', en:'Credit card'},
+  dataPagamento:{it:'Data pagamento', en:'Payment date'},
+  detax:{it:'Mostra prezzo netto (detax)', en:'Show detax (net of VAT)'},
+  venditore:{it:'Venditore', en:'Sold by'},
+  acquirente:{it:'Acquirente', en:'Buyer'},
+  altroRiv:{it:'\u2014 Altro rivenditore (inserisci manualmente) \u2014', en:'\u2014 Other retailer (enter manually) \u2014'},
+  nomeManuale:{it:'Nome (se manuale)', en:'Name (if manual)'},
+  indManuale:{it:'Via, CAP, citt\u00E0, paese \u00B7 telefono', en:'Street, postcode, city, country \u00B7 phone'},
+  aggFornitore:{it:'Aggiungi fornitore \u00B7 ricerca sul web', en:'Add supplier \u00B7 web search'},
+  nomeNegozio:{it:'Nome del negozio o della boutique', en:'Shop or boutique name'},
+  cercaBtn:{it:'Cerca', en:'Search'},
+  oppureManuale:{it:'Oppure inserisci un acquirente diverso manualmente', en:'Or enter a different buyer manually'},
+  nomeAcq:{it:'Nome acquirente', en:'Buyer name'},
+  indirizzo:{it:'Indirizzo', en:'Address'},
+  referenze:{it:'referenze', en:'references'},
+  svuotaLista:{it:'Svuota lista', en:'Clear wishlist'},
+  stampaOrdine:{it:'Stampa ordine', en:'Print order'},
+  sincro:{it:'Sincronizzato su tutti i dispositivi', en:'Synced across devices'},
+  importa:{it:'Importa', en:'Import'},
+  specifiche:{it:'Specifiche', en:'Specifications'},
+  prezziUff:{it:'Prezzi ufficiali al pubblico', en:'Official retail prices'},
+  carTecniche:{it:'Caratteristiche tecniche', en:'Technical characteristics'},
+  analisiExport:{it:'Analisi export \u00B7 netto IVA', en:'Export analysis \u00B7 net of VAT'},
+  mercatoMigliore:{it:'Mercato migliore', en:'Best market'},
+  migliore:{it:'Migliore', en:'Best'},
+  mercato:{it:'Mercato', en:'Market'},
+  listino:{it:'Listino', en:'List price'},
+  iva:{it:'IVA', en:'VAT'},
+  confOrdine:{it:'Conferma d\u2019ordine', en:'Order confirmation'},
+  articolo:{it:'Articolo', en:'Item'},
+  prezzoUnit:{it:'Prezzo unitario', en:'Unit price'},
+  subtotale:{it:'Subtotale', en:'Subtotal'},
+  totale:{it:'Totale', en:'Total'},
+  stampaPdf:{it:'Stampa / Salva PDF', en:'Print / Save PDF'},
+  chiudi:{it:'Chiudi', en:'Close'},
+  collezione:{it:'Collezione', en:'Collection'},
+  referenza:{it:'Referenza', en:'Reference'},
+  materiale:{it:'Materiale cassa', en:'Case material'},
+  diametro:{it:'Diametro', en:'Diameter'},
+  spessore:{it:'Spessore', en:'Thickness'},
+  movimento:{it:'Movimento', en:'Movement'},
+  impermeabilita:{it:'Impermeabilit\u00E0', en:'Water resistance'},
+  disponibilita:{it:'Disponibilit\u00E0', en:'Availability'},
+  collAttuale:{it:'Collezione attuale', en:'Current collection'},
+  svizzera:{it:'Svizzera', en:'Switzerland'},
+  italia:{it:'Italia (UE)', en:'Italy (EU)'},
+  statiUniti:{it:'Stati Uniti', en:'United States'},
+  consegna:{it:'consegna', en:'delivery'},
+  pagamento:{it:'Pagamento', en:'Payment'},
+  scadenza:{it:'scadenza', en:'due'},
+  generatoIl:{it:'generato il', en:'generated on'},
+  orologio1:{it:'orologio', en:'watch'},
+  costoFranchi:{it:'Costo effettivo in franchi', en:'Actual cost in Swiss francs'},
+  cambioDel:{it:'cambio del', en:'rate of'},
+  cambioGiorno:{it:'cambio del giorno', en:'today\u2019s rate'},
+  piuConveniente:{it:'pi\u00F9 conveniente di CHF', en:'cheaper by CHF'},
+  sulSecondo:{it:'sul secondo mercato', en:'than the second market'},
+  alCambio:{it:'Al cambio attuale', en:'At current exchange rates'},
+  nettoIvaEsclusa:{it:'Prezzo netto, IVA', en:'Net price, VAT'},
+  esclusa:{it:'esclusa', en:'excluded'},
+  nonApplicabile:{it:'non applicabile', en:'not applicable'}
+};
+let LANG = (() => { try{ return localStorage.getItem('pp_lang') || 'it'; }catch(e){ return 'it'; } })();
+function t(k){ const v = I18N[k]; return v ? (v[LANG] || v.it) : k; }
+function setLang(l){
+  LANG = l;
+  try{ localStorage.setItem('pp_lang', l); }catch(e){}
+  applicaLingua();
+  render();
+}
+function applicaLingua(){
+  const g = id => document.getElementById(id);
+  if(g('btnRefresh')) g('btnRefresh').textContent = t('aggiorna');
+  const nt = (id, testo) => { const e = g(id); if(e){ const s = e.querySelector('.nt'); if(s) s.textContent = testo; } };
+  nt('btnWish', t('lista'));
+  nt('btnOwn', t('posseduti'));
+  if(g('search')) g('search').placeholder = t('cerca');
+  document.querySelectorAll('.nb[data-l]').forEach(b => b.classList.toggle('on', b.dataset.l === LANG));
+  altezzaTestata();
+}
+// la testata e' fissa: riservo lo spazio sotto, cosi' scorre solo il catalogo
+function altezzaTestata(){
+  const h = document.querySelector('header');
+  if(h) document.body.style.paddingTop = h.offsetHeight + 'px';
+}
+window.addEventListener('resize', altezzaTestata);
+window.addEventListener('orientationchange', () => setTimeout(altezzaTestata, 250));
+
+// ---------- lista desideri, posseduti, ordine ----------
+const WL_KEY = 'pp_wl_v1';
+let WL = (()=>{ try{ const r = localStorage.getItem(WL_KEY); if(r) return JSON.parse(r); }catch(e){}
+  return {wish:[], own:[], sel:[], forn:[], negSel:'', acq:'ch', acqMan:{nome:'',testo:''}}; })();
+for(const k of ['wish','own','sel','forn']) if(!Array.isArray(WL[k])) WL[k] = [];
+if(!WL.acqMan) WL.acqMan = {nome:'',testo:''};
+function saveWL(){ try{ localStorage.setItem(WL_KEY, JSON.stringify(WL)); }catch(e){} pushSync(); }
+
+const ACQ = [
+  {id:'us', flag:'\uD83C\uDDFA\uD83C\uDDF8', nome:'Giovanni Fasciano', testo:'1440 W 23rd St\n33140 Miami Beach, FL\nUnited States'},
+  {id:'ch', flag:'\uD83C\uDDE8\uD83C\uDDED', nome:'Giovanni Fasciano', testo:'Via Zorzi 28\n6900 Paradiso\nSvizzera'}
+];
+const VENDOR_API = 'https://watch-proxy.owscan.workers.dev/vendorsearch?q=';
+const VENDOR_DETAIL = 'https://watch-proxy.owscan.workers.dev/vendordetail?u=';
+const SYNC_URL = 'https://watch-proxy.owscan.workers.dev/sync?code=giovanni-fasciano-pp-wl-7f3k2';
+
+let vista = 'cat';                       // cat · wish · own
+let ordineAperto = false;
+let trovatiForn = [];
+let fornQ = '';
+let fornMsg = '';
+
+const inWish = r => WL.wish.includes(r);
+const inOwn  = r => WL.own.includes(r);
+const inSel  = r => WL.sel.includes(r);
+function togWish(r){ inWish(r) ? WL.wish = WL.wish.filter(x=>x!==r) : WL.wish.push(r); saveWL(); render(); }
+function togOwn(r){
+  if(inOwn(r)) WL.own = WL.own.filter(x=>x!==r);
+  else { WL.own.push(r); WL.wish = WL.wish.filter(x=>x!==r); }
+  saveWL(); render();
+}
+function togSel(r){ inSel(r) ? WL.sel = WL.sel.filter(x=>x!==r) : WL.sel.push(r); saveWL(); render(); }
+
+// sincronizzazione su tutti i dispositivi, come su AP
+let syncTimer = null;
+function pushSync(){
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(async () => {
+    try{
+      await fetch(SYNC_URL, {method:'PUT', headers:{'content-type':'application/json'}, body: JSON.stringify(WL)});
+      const el = document.getElementById('syncSt');
+      if(el) el.textContent = 'sincronizzato ' + new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+    }catch(e){}
+  }, 1200);
+}
+async function pullSync(){
+  try{
+    const r = await fetch(SYNC_URL, {cache:'no-store'});
+    if(!r.ok) return;
+    const d = await r.json();
+    if(d && d.found === false) return;
+    const dati = d && d.wish ? d : (d && d.value) ? d.value : null;
+    if(dati && Array.isArray(dati.wish)){
+      WL = Object.assign(WL, dati);
+      try{ localStorage.setItem(WL_KEY, JSON.stringify(WL)); }catch(e){}
+      render();
+    }
+  }catch(e){}
+}
+
+// ---------- anagrafica fornitori ----------
+async function cercaFornitore(){
+  const q = ((document.getElementById('fq')||{}).value || '').trim();
+  fornQ = q;
+  if(q.length < 3){ fornMsg = 'Scrivi almeno tre lettere.'; disegnaForn(); return; }
+  fornMsg = '<span class="cerca">ricerca in corso\u2026</span>';
+  trovatiForn = [];
+  disegnaForn();
+  try{
+    const r = await fetch(VENDOR_API + encodeURIComponent(q));
+    if(!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    const arr = Array.isArray(d) ? d : (d.results || d.vendors || d.items || []);
+    trovatiForn = arr.map(v => v.kind === 'web'
+      ? {tipo:'web', nome: v.title || q, web: v.url || '', nota: v.snippet || '',
+         ind:'', cap:'', citta:'', paese:'', cc:''}
+      : {tipo:'biz', nome: v.name || q, ind: v.addr || '', cap: v.zip || '',
+         citta: v.city || '', paese: v.country || '', web: v.web || '',
+         cc: ccDaPaese(v.country)});
+    fornMsg = trovatiForn.length
+      ? trovatiForn.length + ' risultati'
+      : 'nessun risultato \u00B7 inserisci il fornitore a mano';
+  }catch(e){
+    fornMsg = '<span class="ko">ricerca non riuscita: ' + esc(String(e.message||e)) + '</span>';
+  }
+  disegnaForn();
+}
+
+function fornHTML(){
+  return '<div class="fstat">' + fornMsg + '</div><div id="fres">' + trovatiForn.map((v,i) => {
+    const sotto = v.tipo === 'web'
+      ? (v.web ? v.web.replace(/^https?:\/\//,'').split('/')[0] : '') + (v.nota ? ' \u00B7 ' + v.nota.slice(0,70) : '')
+      : [v.ind, [v.cap, v.citta].filter(Boolean).join(' '), v.paese].filter(Boolean).join(' \u00B7 ');
+    return '<div class="fres-r"><div><div class="n">'+esc(v.nome)+'</div>' +
+      '<div class="s">'+esc(sotto)+'</div></div>' +
+      '<button class="mini" type="button" data-imp="'+i+'">'+esc(t('importa'))+'</button></div>';
+  }).join('') + '</div>';
+}
+
+function disegnaForn(){
+  const w = document.getElementById('fwrap');
+  if(!w) return;
+  w.innerHTML = fornHTML();
+  w.querySelectorAll('[data-imp]').forEach(b => b.onclick = () => importaForn(+b.dataset.imp));
+}
+
+// il Worker restituisce il nome del paese, non la sigla
+const PAESI = {
+  'switzerland':'CH','suisse':'CH','svizzera':'CH','schweiz':'CH',
+  'italy':'IT','italia':'IT','italie':'IT',
+  'united states':'US','usa':'US','united states of america':'US','stati uniti':'US',
+  'united kingdom':'GB','uk':'GB','england':'GB','regno unito':'GB',
+  'france':'FR','francia':'FR','germany':'DE','germania':'DE','deutschland':'DE',
+  'spain':'ES','spagna':'ES','austria':'AT','monaco':'MC',
+  'united arab emirates':'AE','uae':'AE','hong kong':'HK','singapore':'SG','japan':'JP','giappone':'JP'
+};
+function ccDaPaese(p){
+  const k = String(p||'').trim().toLowerCase();
+  return PAESI[k] || '';
+}
+
+async function importaForn(i){
+  const v = trovatiForn[i];
+  if(!v) return;
+  let rec = Object.assign({}, v);
+  // risultato generico dal web: chiedo al Worker di estrarre nome e indirizzo dal sito
+  if(v.tipo === 'web' && v.web){
+    fornMsg = '<span class="cerca">lettura del sito\u2026</span>';
+    disegnaForn();
+    try{
+      const r = await fetch(VENDOR_DETAIL + encodeURIComponent(v.web));
+      if(r.ok){
+        const d = await r.json();
+        if(d && (d.name || d.addr)){
+          rec.nome = d.name || rec.nome;
+          rec.ind = d.addr || '';
+          const c = String(d.city||'');
+          const mm = c.match(/^\s*([0-9A-Z\-\s]{3,10})\s+(.+)$/);
+          if(mm){ rec.cap = mm[1].trim(); rec.citta = mm[2].trim(); }
+          else rec.citta = c;
+          rec.paese = d.country || '';
+          rec.cc = ccDaPaese(rec.paese);
+        }
+      }
+    }catch(e){}
+  }
+  delete rec.tipo; delete rec.nota;
+  rec.id = 'f' + Date.now();
+  WL.forn.push(rec);
+  WL.negSel = rec.id;
+  if(rec.cc){ const m = {CH:'CHF', IT:'EUR', US:'USD'}; if(m[rec.cc]) WL.cur = m[rec.cc]; }
+  saveWL();
+  fornMsg = '<span style="color:var(--green)">' + esc(rec.nome) + ' importato in anagrafica</span>';
+  trovatiForn = [];
+  render();
+}
+
+window.cercaFornitore = cercaFornitore;
+window.importaForn = importaForn;
+window.rimuoviForn = rimuoviForn;
+function rimuoviForn(id){
+  const n = WL.forn.find(x=>x.id===id);
+  if(!n || !confirm('Rimuovere ' + n.nome + ' dall\u2019anagrafica?')) return;
+  WL.forn = WL.forn.filter(x=>x.id!==id);
+  if(WL.negSel === id) WL.negSel = '';
+  saveWL();
+  render();
+}
+
 function render(){
+  const cw = document.getElementById('cWish'), co = document.getElementById('cOwn');
+  if(cw) cw.textContent = WL.wish.length;
+  if(co) co.textContent = WL.own.length;
+  const bw = document.getElementById('btnWish'), bo = document.getElementById('btnOwn');
+  if(bw) bw.classList.toggle('on', vista === 'wish');
+  if(bo) bo.classList.toggle('on', vista === 'own');
   const q = document.getElementById('search').value.trim().toLowerCase();
   const main = document.getElementById('main');
   main.innerHTML = '';
@@ -967,6 +1505,9 @@ function render(){
   const cols = Object.values(COLLECTIONS).filter(c => byCol[c]);
 
   renderChips(cols, byCol);
+  altezzaTestata();
+
+  if(vista !== 'cat'){ renderLista(main, q); return; }
 
   let shown = 0;
   for(const c of cols){
@@ -986,11 +1527,17 @@ function render(){
       card.className = 'card';
       card.innerHTML =
         (added.includes(p.id) ? '<span class="badge">NEW</span>' : '') +
+        '<button class="ca'+(inWish(p.ref)?' on':'')+'" data-w="'+esc(p.ref)+'" title="Lista desideri">'+(inWish(p.ref)?'\u2665':'\u2661')+'</button>' +
         '<div class="thumb">' + (p.img ? '<img loading="lazy" decoding="async" src="'+esc(thumbURL(p.img))+'" data-orig="'+esc(p.img)+'" alt="" onerror="imgFail(this)">' : '<span class="noimg">NO IMG</span>') + '</div>' +
-        '<div class="meta"><div class="ref">'+esc(p.ref)+'</div>' +
+        '<div class="meta">' +
+        '<div class="mname">'+esc(nomeModello(p))+'</div>' +
+        '<div class="ref">'+esc(p.ref)+'</div>' +
         '<div class="mat">'+esc(p.mat || '')+'</div>' +
-        retailLine(p.ref) +
-        '<div class="col">'+esc(p.col)+'</div></div>';
+        retailLine(p.ref) + '</div>';
+      const bw = card.querySelector('[data-w]');
+      if(bw) bw.addEventListener('click', ev => { ev.stopPropagation(); togWish(p.ref); });
+      const bo = card.querySelector('[data-o]');
+      if(bo) bo.addEventListener('click', ev => { ev.stopPropagation(); togOwn(p.ref); });
       const th = card.querySelector('.thumb');
       if(th) th.addEventListener('click', () => openSheet(p));
       const rf = card.querySelector('.ref');
@@ -1015,6 +1562,323 @@ function render(){
     main.appendChild(sec);
   }
   document.getElementById('empty').style.display = shown ? 'none' : 'block';
+}
+
+// ---------- viste Lista desideri e Posseduti, con barra ordine in stile AP ----------
+function cardMini(p){
+  const selMode = (vista === 'wish');
+  return '<div class="card' + (selMode && inSel(p.ref) ? ' picked' : '') + '">' +
+    '<button class="ca'+(inWish(p.ref)?' on':'')+'" data-w="'+esc(p.ref)+'" title="Lista desideri">'+(inWish(p.ref)?'\u2665':'\u2661')+'</button>' +
+    (selMode ? '<button class="cbox'+(inSel(p.ref)?' on':'')+'" data-x="'+esc(p.ref)+'" title="Metti in ordine">'+(inSel(p.ref)?'\u2713':'')+'</button>' : '') +
+    '<div class="thumb" data-s="'+esc(p.ref)+'">' + (p.img ? '<img loading="lazy" src="'+esc(thumbURL(p.img))+'" data-orig="'+esc(p.img)+'" onerror="imgFail(this)">' : '<span class="noimg">NO IMG</span>') + '</div>' +
+    '<button class="cown'+(inOwn(p.ref)?' on':'')+'" data-o="'+esc(p.ref)+'">' +
+      (inOwn(p.ref) ? '\u2713 ' + esc(t('posseduto')) : '\u25A2 ' + esc(t('segnaPoss'))) + '</button>' +
+    '<div class="meta">' +
+      '<div class="mname">'+esc(nomeModello(p))+'</div>' +
+      '<div class="ref">'+esc(p.ref)+'</div>' +
+      '<div class="mat">'+esc(p.mat||'')+'</div>' +
+      retailLine(p.ref) + '</div></div>';
+}
+
+// nome del modello: Patek non lo pubblica per referenza, uso la collezione
+// e, quando la scheda tecnica e' gia' in cache, la complicazione principale
+function nomeModello(p){
+  const c = descCache[p.ref];
+  if(c && c.v){
+    const mov = (c.v.find(s => /movement|caliber|calibre/i.test(s.t)) || {}).b || '';
+    const compl = [];
+    if(/perpetual calendar/i.test(mov)) compl.push('Perpetual Calendar');
+    else if(/annual calendar/i.test(mov)) compl.push('Annual Calendar');
+    if(/chronograph/i.test(mov)) compl.push('Chronograph');
+    if(/minute repeater/i.test(mov)) compl.push('Minute Repeater');
+    if(/tourbillon/i.test(mov)) compl.push('Tourbillon');
+    if(/moon\s?phase/i.test(mov)) compl.push('Moon Phases');
+    if(compl.length) return compl.join(' \u00B7 ');
+  }
+  return p.col || '';
+}
+
+function renderLista(main, q){
+  const refs = vista === 'wish' ? WL.wish : WL.own;
+  let list = items.filter(p => refs.includes(p.ref));
+  if(q) list = list.filter(p => (p.ref+' '+p.mat+' '+p.col).toLowerCase().includes(q));
+  const scelti = list.filter(p => inSel(p.ref));
+
+  const sec = document.createElement('section');
+  sec.className = 'brand-section';
+
+  if(vista === 'wish'){
+    sec.innerHTML =
+      '<div class="ordhead"><h2>'+esc(t('lista'))+'</h2>' +
+      '<span class="cnt">'+list.length+' '+esc(t('orologi'))+' \u00B7 '+scelti.length+' '+esc(t('selezionati'))+'</span>' +
+      '<div class="obtns">' +
+        '<button class="ob sel" id="bAll">'+esc(t('selTutti'))+'</button>' +
+        '<button class="ob" id="bNone">'+esc(t('deselTutti'))+'</button>' +
+        '<button class="ob gold" id="bOrd">'+esc(ordineAperto?t('chiudiOrdine'):t('creaOrdine'))+'</button>' +
+      '</div></div>' +
+      (ordineAperto ? wishBarHTML(scelti) : '');
+  }else{
+    const tot = {};
+    for(const p of list){ const r = priceSet(p.ref); for(const c of ['CHF','EUR','USD']) if(r[c]!=null) tot[c] = (tot[c]||0) + r[c]; }
+    const righe = ['CHF','EUR','USD'].filter(c=>tot[c]).map(c=>fmt(c, tot[c])).join(' \u00B7 ');
+    sec.innerHTML = '<div class="ordhead"><h2>'+esc(t('posseduti'))+'</h2>' +
+      '<span class="cnt">'+list.length+' '+esc(t('orologi'))+(righe?' \u00B7 '+esc(t('valoreListino'))+' '+righe:'')+'</span></div>';
+  }
+
+  const grid = document.createElement('div');
+  grid.className = 'grid';
+  if(list.length) grid.innerHTML = list.map(cardMini).join('');
+  sec.appendChild(grid);
+  main.appendChild(sec);
+
+  if(!list.length){
+    const e = document.createElement('div');
+    e.className = 'vuoto';
+    e.innerHTML = vista === 'wish' ? t('vuotaLista') : t('vuotaPoss');
+    main.appendChild(e);
+  }
+
+  main.querySelectorAll('[data-x]').forEach(b => b.onclick = ev => { ev.stopPropagation(); togSel(b.dataset.x); });
+  main.querySelectorAll('.cown').forEach(b => b.onclick = ev => { ev.stopPropagation(); togOwn(b.dataset.o); });
+  main.querySelectorAll('[data-w]').forEach(b => b.onclick = ev => { ev.stopPropagation(); togWish(b.dataset.w); });
+  main.querySelectorAll('[data-o]').forEach(b => b.onclick = ev => { ev.stopPropagation(); togOwn(b.dataset.o); });
+  main.querySelectorAll('[data-s]').forEach(t => t.onclick = () => {
+    const p = items.find(x => x.ref === t.dataset.s);
+    if(p) openSheet(p);
+  });
+  main.querySelectorAll('.card .prices').forEach(el => {
+    el.style.cursor = 'pointer';
+    el.title = t('analisiExport');
+    el.onclick = ev => {
+      ev.stopPropagation();
+      const p = items.find(x => x.ref === el.dataset.pp);
+      if(p) openSheet(p, true);
+    };
+  });
+  legaOrdine(list);
+  document.getElementById('empty').style.display = 'none';
+}
+
+function wishBarHTML(scelti){
+  if(!WL.ordNo){
+    WL.ordNo = 'PP-' + new Date().toISOString().slice(2,10).replace(/-/g,'') + '-' + String(Math.floor(Math.random()*90)+10);
+    try{ localStorage.setItem(WL_KEY, JSON.stringify(WL)); }catch(e){}
+  }
+  const cur = wlCur();
+  const iva = VAT[cur];
+  const lordo = scelti.reduce((s,p) => s + (priceSet(p.ref)[cur] || 0), 0);
+  const forn = WL.forn.find(f => f.id === WL.negSel);
+  const a = ACQ.find(x => x.id === WL.acq) || ACQ[1];
+
+  return '<div class="wishbar">' +
+    '<div class="wsec">'+esc(t('secOrdine'))+'</div>' +
+    '<div class="wrow">' +
+      '<div class="wf" style="max-width:230px"><label>'+esc(t('nOrdine'))+'</label><input id="wOrd" value="'+esc(WL.ordNo)+'"></div>' +
+      '<div class="wf"><label>'+esc(t('acquistoIn'))+'</label><div class="pick" id="wPick">' +
+        ['CHF','EUR','USD'].map(c=>'<button class="'+(cur===c?'on':'')+'" data-c="'+c+'">'+FLAG[c]+' '+c+'</button>').join('') +
+      '</div></div>' +
+    '</div>' +
+    '<label class="wchk"><input type="checkbox" id="wCons"'+(WL.cons?' checked':'')+'> '+esc(t('inclConsegna'))+'</label>' +
+    (WL.cons ? '<div class="wf" style="max-width:230px"><label>'+esc(t('dataConsegna'))+'</label><input type="date" id="wConsD" value="'+esc(WL.consD||'')+'"></div>' : '') +
+    '<label class="wchk"><input type="checkbox" id="wPay"'+(WL.pay?' checked':'')+'> '+esc(t('inclPagamento'))+'</label>' +
+    (WL.pay ? '<div class="wrow">' +
+      '<div class="wf"><label>'+esc(t('metodo'))+'</label><select id="wPayM"><option value="b"'+(WL.payM==='b'?' selected':'')+'>'+esc(t('bonifico'))+'</option><option value="c"'+(WL.payM==='c'?' selected':'')+'>'+esc(t('carta'))+'</option></select></div>' +
+      '<div class="wf"><label>'+esc(t('dataPagamento'))+'</label><input type="date" id="wPayD" value="'+esc(WL.payD||'')+'"></div></div>' : '') +
+
+    '<div class="wsec">'+esc(t('secTax'))+'</div>' +
+    '<label class="wchk"><input type="checkbox" id="wDetax"'+(WL.detax?' checked':'')+'> '+esc(t('detax')) +
+      (WL.detax ? ' <input class="wpc" id="wIva" value="'+((iva*100).toFixed(1).replace('.0',''))+'"> %' : '') + '</label>' +
+
+    '<div class="wsec">'+esc(t('secParties'))+'</div>' +
+    '<div class="wboxes">' +
+      '<div class="wbox"><div class="wbh">'+esc(t('venditore'))+'</div>' +
+        '<select id="wNeg">' +
+          '<option value="">'+esc(t('altroRiv'))+'</option>' +
+          WL.forn.map(f=>'<option value="'+esc(f.id)+'"'+(WL.negSel===f.id?' selected':'')+'>'+esc(f.nome)+' \u00B7 '+esc(f.citta||'')+'</option>').join('') +
+        '</select>' +
+        (forn
+          ? '<div class="waddr">'+esc([forn.ind,[forn.cap,forn.citta].filter(Boolean).join(' '),forn.paese].filter(Boolean).join('\n')).replace(/\n/g,'<br>')+'</div>'
+          : '<input id="wNegN" placeholder="'+esc(t('nomeManuale'))+'" value="'+esc(WL.negN||'')+'">' +
+            '<textarea id="wNegA" placeholder="'+esc(t('indManuale'))+'">'+esc(WL.negA||'')+'</textarea>') +
+        '<div class="wman-h">'+esc(t('aggFornitore'))+'</div>' +
+        '<div class="srow"><input id="fq" value="'+esc(fornQ)+'" placeholder="'+esc(t('nomeNegozio'))+'">' +
+          '<button class="mini" id="fbtn" type="button">\uD83D\uDD0E '+esc(t('cercaBtn'))+'</button></div>' +
+        '<div id="fwrap">' + fornHTML() + '</div>' +
+        (WL.forn.length ? '<div class="flist">' + WL.forn.map(f=>'<div class="fres-r"><div><div class="n">'+esc(f.nome)+'</div>' +
+          '<div class="s">'+esc([f.citta,f.paese].filter(Boolean).join(' \u00B7 '))+'</div></div>' +
+          '<button class="mini x" type="button" data-rim="'+esc(f.id)+'">\u2715</button></div>').join('') + '</div>' : '') +
+      '</div>' +
+
+      '<div class="wbox"><div class="wbh">'+esc(t('acquirente'))+'</div>' +
+        '<div class="btabs" id="wAcq">' +
+          ACQ.map(x=>'<button class="'+(WL.acq===x.id?'on':'')+'" data-a="'+x.id+'">'+x.flag+' '+esc(x.nome)+'</button>').join('') +
+        '</div>' +
+        '<div class="waddr">'+esc(a.testo).replace(/\n/g,'<br>')+'</div>' +
+        '<div class="wman-h">'+esc(t('oppureManuale'))+'</div>' +
+        '<input id="wAcqN" placeholder="'+esc(t('nomeAcq'))+'" value="'+esc(WL.acqMan.nome||'')+'">' +
+        '<textarea id="wAcqA" placeholder="'+esc(t('indirizzo'))+'">'+esc(WL.acqMan.testo||'')+'</textarea>' +
+      '</div>' +
+    '</div>' +
+
+    '<div class="wfoot">' +
+      '<div class="wtot"><span>'+scelti.length+' '+esc(t('referenze'))+'</span><span class="big">'+fmt(cur, lordo)+'</span></div>' +
+      '<div class="wact">' +
+        '<button class="ob" id="bSvuota">'+esc(t('svuotaLista'))+'</button>' +
+        '<button class="ob gold" id="bStampa">'+esc(t('stampaOrdine'))+'</button>' +
+      '</div>' +
+    '</div>' +
+    '<div class="wsync">'+esc(t('sincro'))+' \u00B7 <span id="syncSt"></span></div>' +
+  '</div>';
+}
+
+function stampaOrdine(){
+  const cur = wlCur();
+  const scelti = items.filter(p => WL.wish.includes(p.ref) && inSel(p.ref));
+  if(!scelti.length){ alert('Seleziona almeno una referenza.'); return; }
+
+  const iva = WL.detax ? ((parseFloat((document.getElementById('wIva')||{}).value) || VAT[cur]*100) / 100) : VAT[cur];
+  const sub = scelti.reduce((s,p) => s + (priceSet(p.ref)[cur] || 0), 0);
+  const netto = iva ? sub / (1 + iva) : sub;
+
+  const f = WL.forn.find(x => x.id === WL.negSel);
+  const vend = f
+    ? {nome: f.nome, testo: [f.ind, [f.cap, f.citta].filter(Boolean).join(' '), f.paese].filter(Boolean).join('\n')}
+    : {nome: WL.negN || '\u2014', testo: WL.negA || ''};
+  const ap = ACQ.find(x => x.id === WL.acq) || ACQ[1];
+  const acq = (WL.acqMan.nome || WL.acqMan.testo)
+    ? {nome: WL.acqMan.nome || '\u2014', testo: WL.acqMan.testo || ''}
+    : {nome: ap.nome, testo: ap.testo};
+
+  const dataIt = v => v ? new Date(v + 'T00:00:00').toLocaleDateString('it-IT', {day:'2-digit', month:'long', year:'numeric'}) : '';
+  const oggi = new Date().toLocaleDateString('it-IT', {day:'2-digit', month:'long', year:'numeric'});
+  const cons = (WL.cons && WL.consD) ? dataIt(WL.consD) : '';
+  const ordNo = WL.ordNo || '\u2014';
+
+  const righe = scelti.map(p => {
+    const d2 = [t('referenza') + ' ' + p.ref, p.mat].filter(Boolean).join(' \u00B7 ');
+    const img = p.img ? thumbURL(p.img) : '';
+    return '<tr>' +
+      '<td class="ph"><div class="box">' + (img ? '<img src="'+esc(img)+'" onerror="this.style.display=\'none\'">' : '') + '</div></td>' +
+      '<td><div class="d1">Patek Philippe ' + esc(p.col || '') + '</div>' +
+      '<div class="d2">' + esc(d2) + '</div></td>' +
+      '<td class="r gold">' + fmt(cur, priceSet(p.ref)[cur] || 0) + '</td></tr>';
+  }).join('');
+
+  let detaxRow = '';
+  if(WL.detax){
+    detaxRow = '<div class="orow small"><span>' + esc(t('nettoIvaEsclusa')) + ' ' + (iva ? (iva*100).toFixed(1).replace('.0','') + '% ' + esc(t('esclusa')) : esc(t('nonApplicabile'))) +
+               '</span><span class="v">' + fmt(cur, netto) + '</span></div>';
+  }
+
+  let fxLine = '';
+  if(fx){
+    const base = cur === 'CHF' ? sub : (cur === 'EUR' ? sub * fx.EURCHF : sub * fx.USDCHF);
+    const altre = ['CHF','EUR','USD'].filter(c => c !== cur)
+      .map(c => fmt(c, c === 'CHF' ? base : (c === 'EUR' ? base / fx.EURCHF : base / fx.USDCHF))).join(' \u00B7 ');
+    fxLine = '<div class="fxrow">' + esc(t('alCambio')) + ' \u2014 ' + fmt(cur, sub) + ' \u00B7 ' + altre +
+             ' (1 CHF = ' + (1/fx.EURCHF).toFixed(4) + ' EUR = ' + (1/fx.USDCHF).toFixed(4) + ' USD)</div>';
+  }
+
+  const pagamento = WL.pay
+    ? '<div class="ordpay"><span class="k">'+esc(t('pagamento'))+'</span> ' +
+      (WL.payM === 'c' ? t('carta') : t('bonifico')) +
+      (WL.payD ? ' \u00B7 ' + esc(t('scadenza')) + ' ' + esc(dataIt(WL.payD)) : '') + '</div>'
+    : '';
+
+  const ov = ensureSheet();
+  document.getElementById('sheetBox').innerHTML =
+    '<div class="sheet-btns">' +
+      '<button class="bprint" id="btnPrintSheet" type="button">'+esc(t('stampaPdf'))+'</button>' +
+      '<button class="bclose" id="btnCloseSheet" type="button">'+esc(t('chiudi'))+'</button>' +
+    '</div>' +
+    '<div class="sbody ordsheet">' +
+      '<div class="ohead">' +
+        '<div class="obrand">' + (ppLogo
+            ? '<img class="olog" src="' + esc(logoURL(520)) + '" alt="Patek Philippe" onerror="this.outerHTML=\'<div class=&quot;pp&quot;>Patek Philippe</div>\'">'
+            : '<div class="pp">Patek Philippe</div>') +
+          '<div class="gv">Gen\u00E8ve</div></div>' +
+        '<div class="ometa">' +
+          '<div class="olabel">'+esc(t('confOrdine'))+'</div>' +
+          '<div class="ono">' + esc(ordNo) + '</div>' +
+          '<div class="odate">' + esc(oggi) + (cons ? ' \u00B7 ' + esc(t('consegna')) + ': ' + esc(cons) : '') + '</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="ocols">' +
+        '<div class="ocol"><div class="oh">'+esc(t('venditore'))+'</div>' +
+          '<div class="pname">' + esc(vend.nome) + '</div>' +
+          (vend.testo ? '<div class="paddr2">' + esc(vend.testo).replace(/\n/g,'<br>') + '</div>' : '') + '</div>' +
+        '<div class="ocol"><div class="oh">'+esc(t('acquirente'))+'</div>' +
+          '<div class="pname">' + esc(acq.nome) + '</div>' +
+          (acq.testo ? '<div class="paddr2">' + esc(acq.testo).replace(/\n/g,'<br>') + '</div>' : '') + '</div>' +
+      '</div>' +
+      '<table class="ordtable"><thead><tr>' +
+        '<th colspan="2">'+esc(t('articolo'))+'</th><th class="r">'+esc(t('prezzoUnit'))+'</th>' +
+      '</tr></thead><tbody>' + righe + '</tbody></table>' +
+      '<div class="ordtotals">' +
+        '<div class="orow"><span>'+esc(t('subtotale'))+'</span><span class="v">' + fmt(cur, sub) + '</span></div>' +
+        '<div class="orow big"><span>'+esc(t('totale'))+'</span><span class="v gold">' + fmt(cur, sub) + '</span></div>' +
+        detaxRow +
+      '</div>' +
+      pagamento +
+      '<div class="ofoot"><b>' + esc(ordNo) + '</b> \u00B7 ' + scelti.length + ' ' + (scelti.length > 1 ? t('orologi') : t('orologio1')) +
+        ' \u00B7 ' + esc(t('generatoIl')) + ' ' + esc(oggi) + '<br>' +
+        (LANG === 'en'
+          ? 'Prices are official Patek Philippe list prices, retrieved from patek.com. Subject to change and to local taxes. This document is a customer order confirmation and does not constitute an invoice. Unofficial document \u2014 Patek Philippe\u00AE is a trademark of Patek Philippe SA.'
+          : 'I prezzi sono i listini ufficiali Patek Philippe, rilevati da patek.com. Soggetti a variazione e alle imposte locali. Questo documento \u00E8 una conferma d\u2019ordine da parte del cliente e non costituisce fattura. Documento non ufficiale \u2014 Patek Philippe\u00AE \u00E8 un marchio di Patek Philippe SA.') +
+        fxLine +
+      '</div>' +
+    '</div>';
+
+  ov.classList.add('open');
+  document.body.classList.add('sheet-open');
+  ov.onclick = e => { if(e.target === ov) closeSheet(); };
+  document.getElementById('btnPrintSheet').onclick = () => window.print();
+  document.getElementById('btnCloseSheet').onclick = closeSheet;
+}
+
+function wlCur(){ return WL.cur || 'CHF'; }
+
+function legaOrdine(list){
+  const g = id => document.getElementById(id);
+  if(g('bAll')) g('bAll').onclick = () => { list.forEach(p=>{ if(!inSel(p.ref)) WL.sel.push(p.ref); }); saveWL(); render(); };
+  if(g('bNone')) g('bNone').onclick = () => { WL.sel = []; saveWL(); render(); };
+  if(g('bOrd')) g('bOrd').onclick = () => {
+    ordineAperto = !ordineAperto;
+    if(ordineAperto && !WL.sel.filter(r => WL.wish.includes(r)).length){
+      WL.sel = WL.wish.slice();
+      saveWL();
+    }
+    render();
+  };
+  if(g('bSvuota')) g('bSvuota').onclick = () => { if(confirm('Svuotare la lista desideri?')){ WL.wish = []; WL.sel = []; saveWL(); render(); } };
+  if(g('bStampa')) g('bStampa').onclick = stampaOrdine;
+
+  const fb = document.getElementById('fbtn');
+  if(fb) fb.onclick = cercaFornitore;
+  const fi = document.getElementById('fq');
+  if(fi) fi.onkeydown = e => { if(e.key === 'Enter'){ e.preventDefault(); cercaFornitore(); } };
+  document.querySelectorAll('[data-imp]').forEach(b => b.onclick = () => importaForn(+b.dataset.imp));
+  window.disegnaForn = disegnaForn;
+  document.querySelectorAll('[data-rim]').forEach(b => b.onclick = () => rimuoviForn(b.dataset.rim));
+  document.querySelectorAll('#wPick button').forEach(b => b.onclick = () => { WL.cur = b.dataset.c; saveWL(); render(); });
+  document.querySelectorAll('#wAcq button').forEach(b => b.onclick = () => { WL.acq = b.dataset.a; saveWL(); render(); });
+
+  const bind = (id, campo, ev) => { const e = g(id); if(e) e[ev||'oninput'] = () => { WL[campo] = (e.type==='checkbox') ? e.checked : e.value; saveWL(); if(e.type==='checkbox') render(); }; };
+  bind('wOrd','ordNo'); bind('wCons','cons','onchange'); bind('wConsD','consD');
+  bind('wPay','pay','onchange'); bind('wPayM','payM','onchange'); bind('wPayD','payD');
+  bind('wDetax','detax','onchange'); bind('wNegN','negN'); bind('wNegA','negA');
+  const ns = g('wNeg'); if(ns) ns.onchange = () => {
+    WL.negSel = ns.value;
+    const f = WL.forn.find(x=>x.id===ns.value);
+    if(f){ const m = {CH:'CHF', IT:'EUR', US:'USD'}; if(m[f.cc]) WL.cur = m[f.cc]; }
+    saveWL(); render();
+  };
+  const an = g('wAcqN'), aa = g('wAcqA');
+  if(an) an.oninput = () => { WL.acqMan.nome = an.value; saveWL(); };
+  if(aa) aa.oninput = () => { WL.acqMan.testo = aa.value; saveWL(); };
+
+  // selezione referenze dalle card
+
 }
 
 function renderChips(cols, byCol){
@@ -1086,10 +1950,45 @@ function findLogo(raw){
   else if(!/^https?:/i.test(u)) u = 'https://www.patek.com/' + u;
   return u;
 }
+function logoURL(w){
+  if(!ppLogo) return '';
+  return 'https://images.weserv.nl/?url=' + encodeURIComponent(ppLogo.replace(/^https?:\/\//,'')) + '&w=' + (w||420) + '&output=png';
+}
 function logoIMG(){
   if(!ppLogo) return '';
-  const via = 'https://images.weserv.nl/?url=' + encodeURIComponent(ppLogo.replace(/^https?:\/\//,'')) + '&w=420&output=png';
-  return '<img class="pplogo" src="' + esc(via) + '" alt="" onerror="this.style.display=\'none\'">';
+  return '<img class="pplogo" src="' + esc(logoURL(420)) + '" alt="Patek Philippe" onerror="this.style.display=\'none\'">';
+}
+// se il catalogo arriva dalla cache la pagina non viene letta: recupero il marchio a parte
+async function assicuraLogo(){
+  if(ppLogo){ applicaLogo(); return; }
+  try{
+    const h = await getHTML(FINDER);
+    const lg = findLogo(h);
+    if(lg){
+      ppLogo = lg;
+      try{ localStorage.setItem('pp_logo_v1', lg); }catch(e){}
+      applicaLogo();
+      altezzaTestata();
+    }
+  }catch(e){}
+}
+// il marchio del sito serve ancora a scheda e conferma d'ordine
+function logoURL(w){
+  if(!ppLogo) return '';
+  return 'https://images.weserv.nl/?url=' + encodeURIComponent(ppLogo.replace(/^https?:\/\//,'')) + '&w=' + (w||420) + '&cbg=none&output=png';
+}
+function logoIMG(){
+  if(!ppLogo) return '';
+  return '<img class="pplogo" src="' + esc(logoURL(420)) + '" alt="Patek Philippe" onerror="this.style.display=\'none\'">';
+}
+function applicaLogo(){ altezzaTestata(); }
+async function assicuraLogo(){
+  if(ppLogo) return;
+  try{
+    const h = await getHTML(FINDER);
+    const lg = findLogo(h);
+    if(lg){ ppLogo = lg; try{ localStorage.setItem('pp_logo_v1', lg); }catch(e){} }
+  }catch(e){}
 }
 async function fetchDesc(p){
   const c = descCache[p.ref];
@@ -1119,9 +2018,9 @@ function specHTML(p, secs){
   const spess = cerca(/Thickness:\s*([\d.,]+\s?mm)/i);
   const acqua = cerca(/Water-resistant to\s*([\d]+\s?m)/i);
   const mov = cerca(/\b((?:CH\s|CHR\s)?[0-9]{2}-[0-9]{3}[A-Z0-9\s\/]{0,12}?)\s(?:Self-winding|Manual)/i);
-  return riga('Collezione', p.col) + riga('Referenza', p.ref) + riga('Materiale cassa', p.mat) +
-         riga('Diametro', diam) + riga('Spessore', spess) + riga('Movimento', mov) +
-         riga('Impermeabilit\u00E0', acqua) + riga('Disponibilit\u00E0', 'Collezione attuale');
+  return riga(t('collezione'), p.col) + riga(t('referenza'), p.ref) + riga(t('materiale'), p.mat) +
+         riga(t('diametro'), diam) + riga(t('spessore'), spess) + riga(t('movimento'), mov) +
+         riga(t('impermeabilita'), acqua) + riga(t('disponibilita'), t('collAttuale'));
 }
 window.closeSheet = closeSheet;
 function closeSheet(){
@@ -1148,7 +2047,10 @@ function openSheet(p, conExport){
   const oggi = new Date().toLocaleDateString('it-IT', {day:'numeric', month:'long', year:'numeric'});
 
   const testa =
-    '<div class="shd"><div class="pp">Patek Philippe</div><div class="gv">Gen\u00E8ve</div></div>' +
+    '<div class="shd">' + (ppLogo
+        ? '<img class="olog" src="' + esc(logoURL(520)) + '" alt="Patek Philippe" onerror="this.outerHTML=\'<div class=&quot;pp&quot;>Patek Philippe</div>\'">'
+        : '<div class="pp">Patek Philippe</div>') +
+      '<div class="gv">Gen\u00E8ve</div></div>' +
     (p.img ? '<img class="photo" src="' + esc(bigURL(p.img)) + '" onerror="imgFail(this)">' : '') +
     '<div class="rc">' + esc(p.col || '') + '</div>' +
     '<h1>' + esc(p.ref) + '</h1>' +
@@ -1156,13 +2058,13 @@ function openSheet(p, conExport){
 
   const colonne =
     '<div class="grid2">' +
-      '<div><div class="sec">Specifiche</div><div id="sheetSpec">' + specHTML(p, secs) + '</div></div>' +
-      '<div><div class="sec">Prezzi ufficiali al pubblico</div>' +
+      '<div><div class="sec">'+esc(t('specifiche'))+'</div><div id="sheetSpec">' + specHTML(p, secs) + '</div></div>' +
+      '<div><div class="sec">'+esc(t('prezziUff'))+'</div>' +
         '<div class="sprices" id="sheetPrices">' + priceRows(p.ref, true) + bestBlock(p.ref) + '</div></div>' +
     '</div>';
 
   const tecnica =
-    '<div class="tech"><div class="sec">Caratteristiche tecniche</div>' +
+    '<div class="tech"><div class="sec">'+esc(t('carTecniche'))+'</div>' +
     '<div class="tcols" id="sheetDesc">' +
       (secs ? descHTML(secs) : '<span style="color:#bbb">caricamento\u2026</span>') +
     '</div></div>';
@@ -1176,8 +2078,8 @@ function openSheet(p, conExport){
 
   box.innerHTML =
     '<div class="sheet-btns">' +
-      '<button class="bprint" id="btnPrintSheet" type="button">Stampa / Salva PDF</button>' +
-      '<button class="bclose" id="btnCloseSheet" type="button">Chiudi</button>' +
+      '<button class="bprint" id="btnPrintSheet" type="button">'+esc(t('stampaPdf'))+'</button>' +
+      '<button class="bclose" id="btnCloseSheet" type="button">'+esc(t('chiudi'))+'</button>' +
     '</div>' +
     '<div class="sbody">' + testa + colonne + tecnica + exp + piede + '</div>';
 
@@ -1273,6 +2175,10 @@ async function refresh(force){
       const html = await getHTML(FINDER);
       setPhase('Analisi referenze');
       await new Promise(r => setTimeout(r, 30));   // lascia respirare l'animazione
+      if(!ppLogo){
+        const lg = findLogo(html);
+        if(lg){ ppLogo = lg; try{ localStorage.setItem('pp_logo_v1', lg); }catch(e){} }
+      }
       const parsed = parseCatalog(html);
       if(!parsed.length) throw new Error('catalogo non leggibile');
       items = parsed;
@@ -1287,6 +2193,7 @@ async function refresh(force){
     document.getElementById('lastSync').textContent = new Date().toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
     status.innerHTML = '<span class="hl">'+items.length+'</span> modelli a catalogo · ' +
       new Set(items.map(p=>p.col)).size + ' collezioni' + (usedCache ? ' · cache' : '');
+    assicuraLogo();
     renderNews();
     render();
     // segna automaticamente come visto: la prossima lettura mostrerà solo le referenze davvero nuove
@@ -1302,7 +2209,25 @@ async function refresh(force){
 
 document.getElementById('btnRefresh').onclick = () => refresh(true);
 const setBox = document.getElementById('setBox');
-document.getElementById('btnSet').onclick = () => { setBox.classList.toggle('on'); chfInfo(); statoListini(); };
+function setVista(v){
+  vista = (vista === v) ? 'cat' : v;
+  ordineAperto = (vista === 'wish') ? ordineAperto : false;
+  render();
+  window.scrollTo({top: 0});
+}
+document.querySelectorAll('.nb[data-l]').forEach(b => b.onclick = () => setLang(b.dataset.l));
+document.getElementById('btnSearch').onclick = () => {
+  const r = document.getElementById('searchRow');
+  r.classList.toggle('on');
+  document.getElementById('btnSearch').classList.toggle('on', r.classList.contains('on'));
+  if(r.classList.contains('on')) document.getElementById('search').focus();
+  else { document.getElementById('search').value = ''; render(); }
+  altezzaTestata();
+};
+applicaLingua();
+document.getElementById('btnWish').onclick = () => setVista('wish');
+document.getElementById('btnOwn').onclick = () => setVista('own');
+document.getElementById('btnSet').onclick = () => { setBox.classList.toggle('on'); chfInfo(); statoListini(); altezzaTestata(); };
 document.getElementById('btnSetClose').onclick = () => setBox.classList.remove('on');
 document.getElementById('btnEsporta').onclick = esportaListini;
 document.getElementById('btnProva').onclick = async () => {
@@ -1330,7 +2255,10 @@ document.getElementById('chfClear').onclick = () => {
 };
 document.getElementById('search').addEventListener('input', render);
 
+assicuraLogo();
+altezzaTestata();
 loadChfRepo();
+pullSync();
 refresh();
 })();
 </script>
