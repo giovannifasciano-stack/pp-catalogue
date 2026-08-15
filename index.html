@@ -442,7 +442,8 @@ body.sheet-open{overflow:hidden}
   <div id="searchRow"><input id="search" type="search" placeholder="Cerca referenza, materiale…" autocomplete="off"></div>
   <div class="chips" id="chips"></div>
   <div id="setBox">
-    <div class="setTitle">Aggiornamento listini</div>
+    <div class="setTitle">Versione <span id="verSet" style="text-transform:none;letter-spacing:0;color:var(--dim)"></span></div>
+    <div class="setTitle" style="margin-top:12px">Aggiornamento listini</div>
     <div class="setHint">Attiva la VPN sul paese del mercato, poi premi Aggiorna. Il browser legge patek.com con l’indirizzo della VPN, quindi riceve il listino di quel paese.</div>
     <div id="impStato"></div>
     <div id="impBar"><div id="impFill"></div></div>
@@ -483,7 +484,7 @@ body.sheet-open{overflow:hidden}
 
 <footer>
   <div class="src">patek.com · listino EU gen 2026 (€) · novità W&amp;W in CHF</div>
-  <div class="src" id="verLine" style="opacity:.45;font-size:8px">versione —</div>
+  <div class="src" id="verLine" style="opacity:.7;font-size:10px;letter-spacing:.04em">v—</div>
   <div class="src dis">Strumento privato non ufficiale · marchi e contenuti Patek Philippe SA · nessuna affiliazione</div>
 </footer>
 
@@ -910,6 +911,9 @@ async function raccogli(curAtteso){
 }
 
 function statoListini(){
+  const vs = document.getElementById('verSet');
+  const vl = document.getElementById('verLine');
+  if(vs && vl) vs.innerHTML = vl.innerHTML;
   const el = document.getElementById('impStato');
   if(!el) return;
   const nomi = {CHF: '\uD83C\uDDE8\uD83C\uDDED Svizzera', EUR: '\uD83C\uDDEA\uD83C\uDDFA Italia', USD: '\uD83C\uDDFA\uD83C\uDDF8 Stati Uniti'};
@@ -1202,6 +1206,8 @@ function renderNews(){
 })();
 
 // ---------- versione ----------
+// UNICA RIGA DA CAMBIARE A OGNI MODIFICA
+const VER = '1.0';
 // nessun numero scritto a mano: data di pubblicazione del file,
 // piu' la sigla dell'ultima modifica quando GitHub risponde
 const VER_API = 'https://api.github.com/repos/giovannifasciano-stack/pp-catalogue/commits?path=index.html&per_page=1';
@@ -1210,9 +1216,8 @@ function mostraVersione(extra){
   if(!el) return;
   let d = null;
   try{ const x = new Date(document.lastModified); if(!isNaN(x)) d = x; }catch(e){}
-  const data = d ? d.toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit', year:'2-digit'}) +
-                   ' ' + d.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'}) : '';
-  el.textContent = 'versione ' + (data || '\u2014') + (extra ? ' \u00B7 ' + extra : '');
+  const data = d ? d.toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit', year:'2-digit'}) : '';
+  el.innerHTML = '<b>v' + VER + '</b>' + (data ? ' \u00B7 ' + esc(data) : '') + (extra ? ' \u00B7 ' + esc(extra) : '');
 }
 async function versioneRemota(){
   mostraVersione('');
@@ -1225,11 +1230,10 @@ async function versioneRemota(){
     if(Array.isArray(j) && j[0] && j[0].sha){
       const dt = new Date(j[0].commit.author.date);
       const v = dt.toLocaleDateString('it-IT', {day:'2-digit', month:'2-digit', year:'2-digit'}) +
-                ' ' + dt.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'}) +
-                ' \u00B7 ' + j[0].sha.slice(0, 7);
+                ' ' + dt.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'});
       try{ localStorage.setItem('pp_ver_v1', JSON.stringify({v, ts: Date.now()})); }catch(e){}
       const el = document.getElementById('verLine');
-      if(el) el.textContent = 'versione ' + v;
+      if(el) el.innerHTML = '<b>v' + VER + '</b> \u00B7 ' + esc(v);
     }
   }catch(e){}
 }
