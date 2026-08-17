@@ -195,6 +195,32 @@ h1 .mark{display:inline-flex;align-items:center;justify-content:center;width:32p
   .ordsheet .ordtable{font-size:10px;margin-top:16px}
   .ordsheet .ordtotals,.ordsheet .ordpay{width:100%}
 }
+.paybox{margin-top:9px;background:var(--navy);border:1px solid var(--line);border-radius:9px;padding:11px}
+.phead{display:flex;align-items:center;justify-content:space-between;font-family:'DM Mono',monospace;
+  font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:9px}
+.padd{background:transparent;border:1px solid var(--line);border-radius:7px;color:var(--gold2);
+  font-family:'Outfit';font-size:11.5px;padding:5px 10px;cursor:pointer;letter-spacing:0;text-transform:none}
+.prow{display:grid;grid-template-columns:1.1fr .9fr .9fr 1.1fr 30px;gap:6px;margin-bottom:7px;align-items:center}
+.prow input,.prow select{padding:7px 8px!important;font-size:14px!important;border-radius:7px}
+.prow .prm{background:transparent;border:1px solid var(--line);border-radius:7px;color:var(--dim);
+  font-size:12px;padding:6px 0;cursor:pointer}
+.pvuoto{color:var(--dim);font-family:'DM Mono',monospace;font-size:11px;padding:4px 0 8px}
+.ptot{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:12px;
+  color:var(--dim);padding:6px 0 0;border-top:1px solid var(--line);margin-top:4px}
+.ptot:last-child{color:var(--gold2);font-size:13.5px}
+.ptot.ok{color:var(--green)}
+.ptot.ko{color:var(--red)}
+@media (max-width:640px){
+  .prow{grid-template-columns:1fr 1fr 30px;grid-template-areas:'m m x' 'i d x' 'n n x'}
+  .prow .pm{grid-area:m}.prow .pi{grid-area:i}.prow .pd{grid-area:d}.prow .pn{grid-area:n}.prow .prm{grid-area:x;height:100%}
+}
+.sheet .paysec{margin-top:16px}
+.sheet .paytab{width:100%;border-collapse:collapse;font-family:'DM Mono',monospace;font-size:10px;margin-top:6px}
+.sheet .paytab th{font-weight:400;font-size:7px;letter-spacing:.13em;text-transform:uppercase;color:#a2a2a2;padding:0 6px 5px;text-align:left}
+.sheet .paytab th.r,.sheet .paytab td.r{text-align:right}
+.sheet .paytab td{padding:6px;border-top:1px solid #f0ece6;color:#3a3a3a}
+.sheet .paytab tr.pv td{border-top:1px solid #e6e0d6;color:#1a1a1a}
+.sheet .paytab tr.ps td{font-size:12px;color:#b08d3f;border-top:2px solid #e6e0d6}
 .sheet .paddr2{font-size:12px;line-height:1.65;color:#2a2a2a}
 .sheet .dtx{margin-top:13px;background:#f6f2e8;border-left:3px solid #b08d3f;padding:11px 13px;
   font-family:'DM Mono',monospace;font-size:11px;color:#3a3a3a;line-height:1.6}
@@ -941,6 +967,10 @@ function esportaListini(){
 // ---------- analisi export, netto IVA ----------
 // CH 8.1%, IT 22%; il listino USA e' gia' al netto (la sales tax si aggiunge alla cassa e non si recupera)
 const VAT = {CHF: 0.081, EUR: 0.22, USD: 0};
+const METODI = ['contanti','bonifico','carta','assegno','permuta','altroPag'];
+function metodoNome(k){ return t(METODI.includes(k) ? k : 'altroPag'); }
+function pagamenti(){ if(!Array.isArray(WL.pays)) WL.pays = []; return WL.pays; }
+function totVersato(){ return pagamenti().reduce((s,p) => s + (parseFloat(p.imp) || 0), 0); }
 function MERCATI_(){ return {CHF: ['\uD83C\uDDE8\uD83C\uDDED', t('svizzera')], EUR: ['\uD83C\uDDEA\uD83C\uDDFA', t('italia')], USD: ['\uD83C\uDDFA\uD83C\uDDF8', t('statiUniti')]}; }
 function n2(cur, v){
   const o = {minimumFractionDigits: 2, maximumFractionDigits: 2};
@@ -1207,7 +1237,7 @@ function renderNews(){
 
 // ---------- versione ----------
 // UNICA RIGA DA CAMBIARE A OGNI MODIFICA
-const VER = '1.0';
+const VER = '1.1';
 // nessun numero scritto a mano: data di pubblicazione del file,
 // piu' la sigla dell'ultima modifica quando GitHub risponde
 const VER_API = 'https://api.github.com/repos/giovannifasciano-stack/pp-catalogue/commits?path=index.html&per_page=1';
@@ -1270,6 +1300,20 @@ const I18N = {
   inclPagamento:{it:'Includi dettagli di pagamento', en:'Include payment details'},
   metodo:{it:'Metodo', en:'Payment method'},
   bonifico:{it:'Bonifico bancario', en:'Bank transfer'},
+  contanti:{it:'Contanti', en:'Cash'},
+  assegno:{it:'Assegno', en:'Cheque'},
+  permuta:{it:'Permuta', en:'Trade-in'},
+  altroPag:{it:'Altro', en:'Other'},
+  pagamenti:{it:'Pagamenti', en:'Payments'},
+  aggiungiPag:{it:'+ Aggiungi pagamento', en:'+ Add payment'},
+  importo:{it:'Importo', en:'Amount'},
+  data:{it:'Data', en:'Date'},
+  nota:{it:'Nota', en:'Note'},
+  versato:{it:'Versato', en:'Paid'},
+  saldo:{it:'Saldo residuo', en:'Balance due'},
+  saldato:{it:'Saldato', en:'Paid in full'},
+  eccedenza:{it:'Eccedenza', en:'Overpaid'},
+  acconto:{it:'Acconto', en:'Deposit'},
   carta:{it:'Carta di credito', en:'Credit card'},
   dataPagamento:{it:'Data pagamento', en:'Payment date'},
   detax:{it:'Mostra prezzo netto (detax)', en:'Show detax (net of VAT)'},
@@ -1719,9 +1763,7 @@ function wishBarHTML(scelti){
     '<label class="wchk"><input type="checkbox" id="wCons"'+(WL.cons?' checked':'')+'> '+esc(t('inclConsegna'))+'</label>' +
     (WL.cons ? '<div class="wf" style="max-width:230px"><label>'+esc(t('dataConsegna'))+'</label><input type="date" id="wConsD" value="'+esc(WL.consD||'')+'"></div>' : '') +
     '<label class="wchk"><input type="checkbox" id="wPay"'+(WL.pay?' checked':'')+'> '+esc(t('inclPagamento'))+'</label>' +
-    (WL.pay ? '<div class="wrow">' +
-      '<div class="wf"><label>'+esc(t('metodo'))+'</label><select id="wPayM"><option value="b"'+(WL.payM==='b'?' selected':'')+'>'+esc(t('bonifico'))+'</option><option value="c"'+(WL.payM==='c'?' selected':'')+'>'+esc(t('carta'))+'</option></select></div>' +
-      '<div class="wf"><label>'+esc(t('dataPagamento'))+'</label><input type="date" id="wPayD" value="'+esc(WL.payD||'')+'"></div></div>' : '') +
+    (WL.pay ? pagamentiHTML(lordo, cur) : '') +
 
     '<div class="wsec">'+esc(t('secTax'))+'</div>' +
     '<label class="wchk"><input type="checkbox" id="wDetax"'+(WL.detax?' checked':'')+'> '+esc(t('detax')) +
@@ -1817,11 +1859,24 @@ function stampaOrdine(){
              ' (1 CHF = ' + (1/fx.EURCHF).toFixed(4) + ' EUR = ' + (1/fx.USDCHF).toFixed(4) + ' USD)</div>';
   }
 
-  const pagamento = WL.pay
-    ? '<div class="ordpay"><span class="k">'+esc(t('pagamento'))+'</span> ' +
-      (WL.payM === 'c' ? t('carta') : t('bonifico')) +
-      (WL.payD ? ' \u00B7 ' + esc(t('scadenza')) + ' ' + esc(dataIt(WL.payD)) : '') + '</div>'
-    : '';
+  let pagamento = '';
+  if(WL.pay && pagamenti().length){
+    const versato = totVersato();
+    const saldo = sub - versato;
+    const righeP = pagamenti().map(p =>
+      '<tr><td>' + esc(metodoNome(p.m)) + '</td>' +
+      '<td>' + esc(p.data ? dataIt(p.data) : '\u2014') + '</td>' +
+      '<td>' + esc(p.nota || '') + '</td>' +
+      '<td class="r">' + fmt(cur, parseFloat(p.imp) || 0) + '</td></tr>').join('');
+    const etich = Math.abs(saldo) < 0.5 ? t('saldato') : (saldo < 0 ? t('eccedenza') : t('saldo'));
+    pagamento = '<div class="paysec"><div class="exph">' + esc(t('pagamenti')) + '</div>' +
+      '<table class="paytab"><thead><tr><th>' + esc(t('metodo')) + '</th><th>' + esc(t('data')) + '</th>' +
+      '<th>' + esc(t('nota')) + '</th><th class="r">' + esc(t('importo')) + '</th></tr></thead>' +
+      '<tbody>' + righeP +
+      '<tr class="pv"><td colspan="3">' + esc(t('versato')) + '</td><td class="r">' + fmt(cur, versato) + '</td></tr>' +
+      '<tr class="ps"><td colspan="3">' + esc(etich) + '</td><td class="r">' + fmt(cur, Math.abs(saldo)) + '</td></tr>' +
+      '</tbody></table></div>';
+  }
 
   const ov = ensureSheet();
   document.getElementById('sheetBox').innerHTML =
@@ -1874,6 +1929,50 @@ function stampaOrdine(){
   document.getElementById('btnCloseSheet').onclick = closeSheet;
 }
 
+function aggiornaTotaliPag(){
+  const box = document.querySelector('.paybox');
+  if(!box) return;
+  const cur = wlCur();
+  const scelti = items.filter(p => WL.wish.includes(p.ref) && inSel(p.ref));
+  const totale = scelti.reduce((s,p) => s + (priceSet(p.ref)[cur] || 0), 0);
+  const versato = totVersato();
+  const saldo = totale - versato;
+  const tot = box.querySelectorAll('.ptot');
+  if(tot[0]) tot[0].lastElementChild.textContent = fmt(cur, versato);
+  if(tot[1]){
+    const cls = Math.abs(saldo) < 0.5 ? 'ok' : (saldo < 0 ? 'ko' : '');
+    tot[1].className = 'ptot ' + cls;
+    tot[1].firstElementChild.textContent = Math.abs(saldo) < 0.5 ? t('saldato') : (saldo < 0 ? t('eccedenza') : t('saldo'));
+    tot[1].lastElementChild.textContent = fmt(cur, Math.abs(saldo));
+  }
+}
+
+function pagamentiHTML(totale, cur){
+  const ps = pagamenti();
+  const versato = totVersato();
+  const saldo = totale - versato;
+  let righe = ps.map((p,i) =>
+    '<div class="prow">' +
+      '<select class="pm" data-i="'+i+'">' +
+        METODI.map(m => '<option value="'+m+'"'+(p.m===m?' selected':'')+'>'+esc(t(m))+'</option>').join('') +
+      '</select>' +
+      '<input class="pi" data-i="'+i+'" type="number" inputmode="decimal" step="0.01" placeholder="'+esc(t('importo'))+'" value="'+esc(p.imp!=null?p.imp:'')+'">' +
+      '<input class="pd" data-i="'+i+'" type="date" value="'+esc(p.data||'')+'">' +
+      '<input class="pn" data-i="'+i+'" placeholder="'+esc(t('nota'))+'" value="'+esc(p.nota||'')+'">' +
+      '<button class="prm" type="button" data-i="'+i+'">\u2715</button>' +
+    '</div>').join('');
+  if(!righe) righe = '<div class="pvuoto">\u2014</div>';
+  const cls = Math.abs(saldo) < 0.5 ? 'ok' : (saldo < 0 ? 'ko' : '');
+  const etich = Math.abs(saldo) < 0.5 ? t('saldato') : (saldo < 0 ? t('eccedenza') : t('saldo'));
+  return '<div class="paybox">' +
+    '<div class="phead"><span>'+esc(t('pagamenti'))+'</span>' +
+      '<button class="padd" type="button" id="pAdd">'+esc(t('aggiungiPag'))+'</button></div>' +
+    righe +
+    '<div class="ptot"><span>'+esc(t('versato'))+'</span><span>'+fmt(cur, versato)+'</span></div>' +
+    '<div class="ptot ' + cls + '"><span>'+esc(etich)+'</span><span>'+fmt(cur, Math.abs(saldo))+'</span></div>' +
+  '</div>';
+}
+
 function wlCur(){ return WL.cur || 'CHF'; }
 
 function legaOrdine(list){
@@ -1911,6 +2010,23 @@ function legaOrdine(list){
     if(f){ const m = {CH:'CHF', IT:'EUR', US:'USD'}; if(m[f.cc]) WL.cur = m[f.cc]; }
     saveWL(); render();
   };
+  const add = g('pAdd');
+  if(add) add.onclick = () => {
+    pagamenti().push({m: pagamenti().length ? 'contanti' : 'bonifico', imp:'', data:new Date().toISOString().slice(0,10), nota:''});
+    saveWL(); render();
+  };
+  document.querySelectorAll('.paybox .prm').forEach(b => b.onclick = () => {
+    pagamenti().splice(+b.dataset.i, 1); saveWL(); render();
+  });
+  const campo = (sel, chiave, ridisegna) => document.querySelectorAll(sel).forEach(e => {
+    e.oninput = () => { pagamenti()[+e.dataset.i][chiave] = e.value; saveWL(); if(ridisegna) aggiornaTotaliPag(); };
+    e.onchange = () => { pagamenti()[+e.dataset.i][chiave] = e.value; saveWL(); if(ridisegna) aggiornaTotaliPag(); };
+  });
+  campo('.paybox .pm', 'm', false);
+  campo('.paybox .pi', 'imp', true);
+  campo('.paybox .pd', 'data', false);
+  campo('.paybox .pn', 'nota', false);
+
   const an = g('wAcqN'), aa = g('wAcqA');
   if(an) an.oninput = () => { WL.acqMan.nome = an.value; saveWL(); };
   if(aa) aa.oninput = () => { WL.acqMan.testo = aa.value; saveWL(); };
