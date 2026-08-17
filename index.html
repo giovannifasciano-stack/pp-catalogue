@@ -1237,7 +1237,7 @@ function renderNews(){
 
 // ---------- versione ----------
 // UNICA RIGA DA CAMBIARE A OGNI MODIFICA
-const VER = '1.2';
+const VER = '1.2.1';
 // nessun numero scritto a mano: data di pubblicazione del file,
 // piu' la sigla dell'ultima modifica quando GitHub risponde
 const VER_API = 'https://api.github.com/repos/giovannifasciano-stack/pp-catalogue/commits?path=index.html&per_page=1';
@@ -1294,6 +1294,7 @@ const I18N = {
   secTax:{it:'Tax', en:'Tax'},
   secParties:{it:'Parties', en:'Parties'},
   nOrdine:{it:'N. ordine', en:'Order no.'},
+  nuovoNum:{it:'Genera un numero nuovo', en:'Generate a new number'},
   acquistoIn:{it:'Acquisto in', en:'Buying from'},
   inclConsegna:{it:'Includi data di consegna', en:'Include delivery date'},
   dataConsegna:{it:'Data di consegna', en:'Delivery date'},
@@ -1742,7 +1743,7 @@ function renderLista(main, q){
 }
 
 function wishBarHTML(scelti){
-  if(!WL.ordNo) nuovoNumeroOrdine();
+  if(!numeroValido(WL.ordNo)) nuovoNumeroOrdine();
   const cur = wlCur();
   const iva = VAT[cur];
   const lordo = scelti.reduce((s,p) => s + (priceSet(p.ref)[cur] || 0), 0);
@@ -1752,7 +1753,9 @@ function wishBarHTML(scelti){
   return '<div class="wishbar">' +
     '<div class="wsec">'+esc(t('secOrdine'))+'</div>' +
     '<div class="wrow">' +
-      '<div class="wf" style="max-width:230px"><label>'+esc(t('nOrdine'))+'</label><input id="wOrd" value="'+esc(WL.ordNo)+'"></div>' +
+      '<div class="wf" style="max-width:280px"><label>'+esc(t('nOrdine'))+'</label>' +
+        '<div class="srow"><input id="wOrd" value="'+esc(WL.ordNo)+'">' +
+        '<button class="mini" type="button" id="wOrdNew" title="'+esc(t('nuovoNum'))+'">\u21BB</button></div></div>' +
       '<div class="wf"><label>'+esc(t('acquistoIn'))+'</label><div class="pick" id="wPick">' +
         ['CHF','EUR','USD'].map(c=>'<button class="'+(cur===c?'on':'')+'" data-c="'+c+'">'+FLAG[c]+' '+c+'</button>').join('') +
       '</div></div>' +
@@ -1978,6 +1981,15 @@ function pagamentiHTML(totale, cur){
   '</div>';
 }
 
+const FORMATO_ORD = /^PP-\d{6}-\d{4}-\d{3}$/;
+// vale se e' nel formato nuovo e porta la data di oggi
+function numeroValido(v){
+  if(!v || !FORMATO_ORD.test(v)) return false;
+  const d = new Date();
+  const p2 = x => String(x).padStart(2, '0');
+  const oggi = String(d.getFullYear()).slice(2) + p2(d.getMonth() + 1) + p2(d.getDate());
+  return v.slice(3, 9) === oggi;
+}
 // PP-AAMMGG-HHMM-NNN · il progressivo cresce a ogni ordine e viaggia tra i dispositivi
 function nuovoNumeroOrdine(){
   const d = new Date();
@@ -2027,6 +2039,8 @@ function legaOrdine(list){
     if(f){ const m = {CH:'CHF', IT:'EUR', US:'USD'}; if(m[f.cc]) WL.cur = m[f.cc]; }
     saveWL(); render();
   };
+  const rig = g('wOrdNew');
+  if(rig) rig.onclick = () => { nuovoNumeroOrdine(); const c = g('wOrd'); if(c) c.value = WL.ordNo; };
   const add = g('pAdd');
   if(add) add.onclick = () => {
     pagamenti().push({m: pagamenti().length ? 'contanti' : 'bonifico', imp:'', data:new Date().toISOString().slice(0,10), nota:''});
